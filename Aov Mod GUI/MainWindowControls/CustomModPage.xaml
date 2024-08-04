@@ -1,0 +1,92 @@
+﻿<UserControl x:Class="Aov_Mod_GUI.MainWindowControls.CustomModPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Aov_Mod_GUI.MainWindowControls" xmlns:aov_mod_gui="clr-namespace:Aov_Mod_GUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel x:Name="CustomActions" Visibility="Visible">
+        <aov_mod_gui:PathTextedit x:Name="CustomHeroId" PathLabel="Hero Id:"/>
+        <aov_mod_gui:PathTextedit x:Name="CustomSkinName" PathLabel="Tên Skin:"/>
+        <aov_mod_gui:PathTextedit x:Name="FolderSavePath" PathLabel="Folder Path:" IsFolderSelect="True"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="GenerateModFolder" Content="Generate Mod Folder" Padding="10"  Margin="10 5" Grid.Column="0"
+            FontSize="15" FontFamily="{StaticResource Montserrat}" Visibility="Visible" Click="GenerateModFolder_Click"/>
+            <Button x:Name="EditModFolder" Content="Edit Mod Folder" Padding="10"  Margin="10 5" Grid.Column="1"
+            FontSize="15" FontFamily="{StaticResource Montserrat}" Visibility="Visible" Click="EditModFolder_Click"/>
+        </Grid>
+
+        <Separator Margin="10"/>
+
+        <StackPanel x:Name="CustomModControl">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="70"/>
+                </Grid.ColumnDefinitions>
+                <aov_mod_gui:PathTextedit x:Name="IconNewId" PathLabel="Icon New Id: "
+                    FontSize="15" FontFamily="{StaticResource Montserrat}"/>
+
+                <CheckBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Content="Swap Index" Foreground="White" x:Name="SwapIndexCheckBox" IsChecked="True">
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <StackPanel Orientation="Vertical">
+                                <Image x:Name="isCheckedImage" Source="/images/ic_x.png" Height="30" Width="30"/>
+                                <ContentPresenter HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="isCheckedImage" Property="Source" Value="/images/ic_tick.png"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </CheckBox.Template>
+                </CheckBox>
+            </Grid>
+            <!--<aov_mod_gui:PathTextedit x:Name="LabelNewId" PathLabel="Label New Id: "
+        FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
+            <Grid Margin="10 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" MaxWidth="250"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Label New Id:" VerticalAlignment="Center" FontFamily="{StaticResource Montserrat}"
+                       Foreground="White" FontSize="20" Padding="10"/>
+                <ComboBox Name="LabelCombobox" Grid.Column="1" Margin="10 5" FontSize="16"/>
+            </Grid>
+            <aov_mod_gui:PathTextedit x:Name="SoundNewIds" PathLabel="Sound New Ids: "
+            FontSize="15" FontFamily="{StaticResource Montserrat}" ToolTip="Split By ';'"/>
+            <!--<Button x:Name="CustomIconBtn" Content="Custom Actor Icon, Label" Padding="10"  Margin="10 5"
+            FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
+            <!--<Button x:Name="TestBtn" Content="Test" Padding="10"  Margin="10 5"
+            FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
+            <Button x:Name="CustomInfoBtn" Content="Custom Actor Infos" Padding="10"  Margin="10 5"
+            FontSize="15" FontFamily="{StaticResource Montserrat}"/>
+            <Button x:Name="CustomActionBtn" Content="Custom Actor Actions" Padding="10"  Margin="10 5"
+            FontSize="15" FontFamily="{StaticResource Montserrat}"/>
+            <Button x:Name="CustomCommonActionsBtn" Content="Custom Common Actions" Padding="10"  Margin="10 5"
+            FontSize="15" FontFamily="{StaticResource Montserrat}"/>
+            <!--<Button x:Name="CustomSoundBtn" Content="Custom Actor Sound" Padding="10"  Margin="10 5"
+            FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
+
+            <Separator Margin="10 10 10 15"/>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="CustomCompletedBtn" Content="Hoàn thành" Padding="10"  Margin="10 5 10 20" Grid.Column="1"
+                    FontSize="15" FontFamily="{StaticResource Montserrat}" Click="CustomCompletedBtn_Click"/>
+                <Button x:Name="CustomCancelBtn" Content="Huỷ" Padding="10"  Margin="10 5 10 20"
+                    FontSize="15" FontFamily="{StaticResource Montserrat}" Click="CustomCancelBtn_Click"/>
+            </Grid>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

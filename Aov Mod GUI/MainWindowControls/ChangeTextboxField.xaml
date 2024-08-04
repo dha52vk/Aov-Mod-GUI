@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="Aov_Mod_GUI.MainWindowControls.ChangeTextboxField"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Aov_Mod_GUI.MainWindowControls"
+             mc:Ignorable="d" Height="50">
+    <UserControl.Resources>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="DarkGray"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="5 10"/>
+            <Setter Property="FontFamily" Value="{StaticResource Montserrat}"/>
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="AcceptsReturn" Value="False" />
+            <Setter Property="AcceptsTab" Value="False" />
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Label Foreground="White" Content="Label:" FontFamily="{StaticResource Montserrat}"
+               x:Name="TextLabel" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="15"/>
+        <TextBox Grid.Column="1" x:Name="OldTextBox"/>
+        <TextBlock Grid.Column="2" Text="==>" Foreground="White"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBox Grid.Column="3" x:Name="NewTextBox" />
+    </Grid>
+</UserControl>

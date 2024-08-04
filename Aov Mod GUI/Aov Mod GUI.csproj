@@ -1,0 +1,113 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>Aov_Mod_GUI</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="images\ic_add.png" />
+    <None Remove="images\ic_adjustment.png" />
+    <None Remove="images\ic_clear.png" />
+    <None Remove="images\ic_clearfilter.png" />
+    <None Remove="images\ic_copy.png" />
+    <None Remove="images\ic_edit.png" />
+    <None Remove="images\ic_import.png" />
+    <None Remove="images\ic_insert_row.png" />
+    <None Remove="images\ic_paste.png" />
+    <None Remove="images\ic_paste_as_child.png" />
+    <None Remove="images\ic_paste_in_same_parent.png" />
+    <None Remove="images\ic_popup_wd.png" />
+    <None Remove="images\ic_remove.png" />
+    <None Remove="images\ic_rightarrow.png" />
+    <None Remove="images\ic_search.png" />
+    <None Remove="images\ic_select_all.png" />
+    <None Remove="images\ic_subtract.png" />
+    <None Remove="images\ic_swap.png" />
+    <None Remove="images\ic_variable.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
+    <PackageReference Include="ZstdNet" Version="1.4.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AovClass">
+      <HintPath>..\..\AovClass\AovClass\bin\Debug\net8.0\AovClass.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Fonts\MONTSERRAT-BLACK.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-BLACKITALIC.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-BOLD.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-BOLDITALIC.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-EXTRABOLD.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-EXTRABOLDITALIC.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-EXTRALIGHT.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-EXTRALIGHTITALIC.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-ITALIC.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-LIGHT.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-LIGHTITALIC.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-MEDIUM.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-MEDIUMITALIC.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-REGULAR.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-SEMIBOLD.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-SEMIBOLDITALIC.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-THIN.TTF" />
+    <Resource Include="Fonts\MONTSERRAT-THINITALIC.TTF" />
+    <Resource Include="images\icon_close.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\icon_maximize.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\icon_menu.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\icon_minimize.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\ic_add.png" />
+    <Resource Include="images\ic_adjustment.png" />
+    <Resource Include="images\ic_clear.png" />
+    <Resource Include="images\ic_clearfilter.png" />
+    <Resource Include="images\ic_copy.png" />
+    <Resource Include="images\ic_custom.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\ic_edit.png" />
+    <Resource Include="images\ic_home.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\ic_import.png" />
+    <Resource Include="images\ic_insert_row.png" />
+    <Resource Include="images\ic_paste.png" />
+    <Resource Include="images\ic_paste_as_child.png" />
+    <Resource Include="images\ic_paste_in_same_parent.png" />
+    <Resource Include="images\ic_popup_wd.png" />
+    <Resource Include="images\ic_remove.png" />
+    <Resource Include="images\ic_rightarrow.png" />
+    <Resource Include="images\ic_search.png" />
+    <Resource Include="images\ic_select_all.png" />
+    <Resource Include="images\ic_settings.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\ic_subtract.png" />
+    <Resource Include="images\ic_swap.png" />
+    <Resource Include="images\ic_tick.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\ic_variable.png" />
+    <Resource Include="images\ic_x.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+</Project>

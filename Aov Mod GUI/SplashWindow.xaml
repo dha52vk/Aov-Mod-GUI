@@ -1,0 +1,18 @@
+﻿<Window x:Class="Aov_Mod_GUI.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Aov_Mod_GUI"
+        mc:Ignorable="d" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        Title="SplashWindow" Height="250" Width="450" Topmost="True"
+        Background="#1E1E1E" ShowInTaskbar="False">
+    <Grid>
+        <Label VerticalAlignment="Center" HorizontalAlignment="Center"
+               Content="Đang mở ứng dụng..." Foreground="White"
+               FontStyle="Italic" FontWeight="Bold" FontSize="20"/>
+        <Label HorizontalAlignment="Center" VerticalAlignment="Bottom"
+               Content="" Foreground="White"
+               FontWeight="DemiBold" Opacity="0.5" x:Name="AppName"/>
+    </Grid>
+</Window>

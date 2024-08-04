@@ -1,0 +1,82 @@
+﻿<Window x:Class="Aov_Mod_GUI.CustomModWd.CusIcon"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Aov_Mod_GUI.CustomModWd" 
+        mc:Ignorable="d" Background="#FF191919" ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        Title="CusIcon" Height="250" Width="700">
+    <Window.Resources>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="DarkGray"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="5 10"/>
+            <Setter Property="FontFamily" Value="{StaticResource Montserrat}"/>
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="AcceptsReturn" Value="False" />
+            <Setter Property="AcceptsTab" Value="False" />
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" x:Name="CusWdTitle" Content="Custom Icon, Label: Murad Maple"
+               FontFamily="{StaticResource Montserrat Bold}" FontSize="18" Padding="10" Foreground="White"
+               HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="70"/>
+            </Grid.ColumnDefinitions>
+            <Label Foreground="White" Content="Icon:" FontFamily="{StaticResource Montserrat}"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <TextBox Grid.Column="1" x:Name="IconBaseId" IsReadOnly="True"/>
+            <TextBlock Grid.Column="2" Text="==>" Foreground="White" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="3" x:Name="IconNewId" />
+
+            <CheckBox Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Content="Swap Index" Foreground="White" x:Name="SwapIndexCheckBox" IsChecked="True">
+                <CheckBox.Template>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Vertical">
+                            <Image x:Name="isCheckedImage" Source="/images/ic_x.png" Height="30" Width="30"/>
+                            <ContentPresenter HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="isCheckedImage" Property="Source" Value="/images/ic_tick.png"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </CheckBox.Template>
+            </CheckBox>
+        </Grid>
+        
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="70"/>
+            </Grid.ColumnDefinitions>
+            <Label Foreground="White" Content="Label:" FontFamily="{StaticResource Montserrat}"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <TextBox Grid.Column="1" x:Name="LabelBaseId" IsReadOnly="True"/>
+            <TextBlock Grid.Column="2" Text="==>" Foreground="White"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="3" x:Name="LabelNewId" />
+        </Grid>
+
+        <Button Grid.Row="3" Content="Hoàn thành" Margin="10"
+                Click="Button_Click"/>
+    </Grid>
+</Window>

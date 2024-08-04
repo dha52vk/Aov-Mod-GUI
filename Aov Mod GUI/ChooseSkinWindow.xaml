@@ -1,0 +1,66 @@
+﻿<Window x:Class="Aov_Mod_GUI.ChooseSkinWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Aov_Mod_GUI"
+        mc:Ignorable="d"
+        Background="#1E1E1E" AllowsTransparency="True"
+        WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False"
+        Title="Choose Skin Window" Height="280" Width="500">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
+            <ItemsControl x:Name="ListItem" MouseLeftButtonDown="ListItem_MouseLeftButtonDown">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid x:Name="ListItemGrid" Columns="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" 
+                                        Background="#BBE1FA" Margin="5" ToolTip="{Binding Name}">
+                            <StackPanel Orientation="Vertical" >
+                                <Image Source="{Binding IconURL}"/>
+                                <TextBlock Text="{Binding Name}" HorizontalAlignment="Stretch" 
+                                                   FontFamily="Montserrat Medium" FontSize="12" Foreground="Black"
+                                                   Padding="5 10" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Skin đã chọn: " Foreground="White" VerticalAlignment="Center"
+                   FontFamily="Montserrat Bold" FontSize="15" Margin="10 0"/>
+            <TextBlock Grid.Column="1" x:Name="SkinResultName" Foreground="White" VerticalAlignment="Center"
+                       FontFamily="Montserrat Bold Italic" FontSize="18" Margin="0"
+                       Text="Hỏa diệm Chu tước"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="CancelButton" Grid.Column="0" BorderThickness="0" Background="Red" Click="CancelButton_Click">
+                <Image Source="/images/ic_x.png" Margin="5"/>
+            </Button>
+            <Button x:Name="SubmitButton" Grid.Column="1" BorderThickness="0" Background="LawnGreen" Click="SubmitButton_Click">
+                <Image Source="/images/ic_tick.png" Margin="2"/>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

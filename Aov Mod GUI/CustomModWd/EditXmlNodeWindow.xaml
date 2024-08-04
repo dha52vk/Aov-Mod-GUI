@@ -1,0 +1,36 @@
+﻿<Window x:Class="Aov_Mod_GUI.CustomModWd.EditXmlNodeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Aov_Mod_GUI.CustomModWd"
+        mc:Ignorable="d" Background="#1E1E1E" 
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" WindowStyle="None"
+        Title="EditXmlNodeWindow" Height="350" Width="500">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <Label x:Name="NodeLabel" Content="Node Name"
+               FontFamily="{StaticResource Montserrat ExtraBold}" FontSize="18"
+               Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="AttributeFieldContainer">
+                
+            </StackPanel>
+        </ScrollViewer>
+        
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Click="CancelButton_Click" Margin="5" Content="Cancel"/>
+            <Button Grid.Column="1" Click="ApplyButton_Click" Margin="5" Content="Apply"/>
+        </Grid>
+    </Grid>
+</Window>
