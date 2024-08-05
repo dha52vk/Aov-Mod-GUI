@@ -1,12 +1,14 @@
 ﻿using Aov_Mod_GUI.MainWindowControls;
 using Aov_Mod_GUI.Models;
 using AovClass;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -33,6 +35,7 @@ namespace Aov_Mod_GUI.CustomModWd
         public static List<ProjectItem>? ItemsCopied { get; set; }
         ObservableCollection<ProjectItem> itemSources = [];
         bool _IsReadOnly = false;
+        string? SavePackagePath = null;
         public bool IsReadOnly
         {
             get => _IsReadOnly;
@@ -62,10 +65,31 @@ namespace Aov_Mod_GUI.CustomModWd
         TextChangedEventHandler? OtherCustomPathChanged;
         SelectionChangedEventHandler? OtherActionsComboboxChanged;
 
+        public CusProjectXml()
+        {
+            InitializeComponent();
+            OpenFileDialog openFileDialog = new() { CheckFileExists = true, Multiselect = true };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                SavePackagePath = openFileDialog.FileName;
+                projectPackage = new ProjectPackage(SavePackagePath);
+                Init();
+            }
+            else
+            {
+                Close();
+            }
+        }
+
         public CusProjectXml(ProjectPackage package)
         {
             InitializeComponent();
             projectPackage = package;
+            Init();
+        }
+
+        private void Init()
+        {
             ContentRendered += CusProjectXml_ContentRendered;
             OtherCustomPathChanged = (sender, e) =>
             {
@@ -82,20 +106,21 @@ namespace Aov_Mod_GUI.CustomModWd
 
             OtherCustomPath.TextChanged = OtherCustomPathChanged;
             OtherActionsCombobox.SelectionChanged += OtherActionsComboboxChanged;
+            this.Title = projectPackage.PackageTitle;
 
             SearchPage.Visibility = Visibility.Collapsed;
             ShowOtherPage.Visibility = Visibility.Collapsed;
 
             SaveActionBtn.Click += SaveActionBtn_Click;
             AddFilterFieldButton.Click += AddFilterFieldButton_Click;
-            AddFilterFieldPopup.MouseLeave += (sender, e) =>
-            {
-                AddFilterFieldPopup.IsOpen = false;
-            };
             AddTagNameFilterButton.Click += AddTagNameFilterButton_Click;
             AddAttributeFilterButton.Click += AddAttributeFilterButton_Click;
             ClearFilterFieldButton.Click += ClearFilterFieldButton_Click;
             InsertTemplateBtn.Click += InsertTemplateBtn_Click;
+            AddFilterFieldPopup.MouseLeave += (sender, e) =>
+            {
+                AddFilterFieldPopup.IsOpen = false;
+            };
         }
 
         private void InsertTemplateBtn_Click(object sender, RoutedEventArgs e)
@@ -159,7 +184,22 @@ namespace Aov_Mod_GUI.CustomModWd
 
         private void SaveActionBtn_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            if (IsReadOnly)
+            {
+                Close();
+                return;
+            }
+
+            if (string.IsNullOrEmpty(SavePackagePath))
+            {
+                Close();
+            }
+            else
+            {
+                ProgressWindow progressWd = new() { Owner=this};
+                progressWd.Execute(() => projectPackage.SaveTo(SavePackagePath));
+                progressWd.ShowDialog();
+            }
         }
 
         private void TreeView_KeyDown(object sender, KeyEventArgs e)
@@ -196,6 +236,10 @@ namespace Aov_Mod_GUI.CustomModWd
                 else if (Keyboard.IsKeyDown(Key.R))
                 {
                     ReplaceBtn_Click(new(), new());
+                }
+                else if (Keyboard.IsKeyDown(Key.S))
+                {
+                    SaveActionBtn_Click(new(), new());
                 }
             }
             else
@@ -452,7 +496,7 @@ namespace Aov_Mod_GUI.CustomModWd
                 {
                     return node.GetAttribute("objectName") ?? "";
                 }
-                else if (node?.Name == "Vector3i")
+                else if (node?.Name == "Vector3i" || node?.Name == "Vector3")
                 {
                     return $"x: {node.GetAttribute("x")}, y: {node.GetAttribute("y")}, z: {node.GetAttribute("z")}";
                 }
@@ -516,9 +560,16 @@ namespace Aov_Mod_GUI.CustomModWd
                 if (node?.Name == "Condition")
                 {
                     XmlNode? Track = Root?.GetActionNodes()?.Find((track) => track.GetAttribute("guid") == node.GetAttribute("guid"));
-                    XmlNode? SecParam = Track?.GetChildrenByName("Event")?[0].ChildNodes.Item(1);
-                    return (Track?.GetAttribute("eventType") + " - " ?? "") +
-                        (SecParam?.GetAttribute("name") ?? "") + ": " + (SecParam?.GetAttribute("value") ?? "");
+                    XmlNodeList? list = Track?.GetChildrenByName("Event")?[0].ChildNodes;
+                    string parameters = "";
+                    if (list != null)
+                    {
+                        foreach (XmlNode param in list)
+                        {
+                            parameters += (param.GetAttribute("name") ?? "") + ": " + (param.GetAttribute("value") ?? "") + ", ";
+                        }
+                    }
+                    return (Track?.GetAttribute("eventType") + " - " ?? "") + parameters;
                 }
                 else
                     return "";
@@ -569,7 +620,7 @@ namespace Aov_Mod_GUI.CustomModWd
             if (index < 0)
                 return;
             newChild.Parent = this;
-            XmlNode? newNode = node?.OwnerDocument?.ImportNode(newChild.node, true);
+            XmlNode? newNode = node?.OwnerDocument?.ImportNode(newChild.node, true) ?? Root?.document.ImportNode(newChild.node, true);
             if (newNode == null) return;
             newChild.node = newNode;
             Children.Insert(index, newChild);
@@ -592,7 +643,7 @@ namespace Aov_Mod_GUI.CustomModWd
             if (newChild.node == null)
                 return;
             newChild.Parent = this;
-            XmlNode? newNode = node?.OwnerDocument?.ImportNode(newChild.node, true);
+            XmlNode? newNode = node?.OwnerDocument?.ImportNode(newChild.node, true) ?? Root?.document.ImportNode(newChild.node, true);
             if (newNode == null) return;
             newChild.node = newNode;
             Children.Add(newChild);
@@ -615,7 +666,14 @@ namespace Aov_Mod_GUI.CustomModWd
             if (child.node == null)
                 return;
             Children.Remove(child);
-            node?.RemoveChild(child.node);
+            if (IsRoot)
+            {
+                child.node.ParentNode?.RemoveChild(child.node);
+            }
+            else
+            {
+                node?.RemoveChild(child.node);
+            }
         }
 
         public ProjectItem? Clone()

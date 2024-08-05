@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Aov_Mod_GUI.CustomModWd" xmlns:aov_mod_gui="clr-namespace:Aov_Mod_GUI"
+        xmlns:local="clr-namespace:Aov_Mod_GUI.CustomModWd" xmlns:aov_mod_gui="clr-namespace:Aov_Mod_GUI" xmlns:models="clr-namespace:Aov_Mod_GUI.Models"
         mc:Ignorable="d"
         Title="CusInfos" Height="500" Width="800" MinWidth="520">
     <Window.Resources>
@@ -34,7 +34,7 @@
             <RowDefinition/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
-        <TreeView x:Name="InfosTreeView" ItemsSource="{Binding Children}" KeyDown="TreeView_KeyDown">
+        <models:MultiSelectTreeView x:Name="InfosTreeView" ItemsSource="{Binding Children}" KeyDown="TreeView_KeyDown">
             <TreeView.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black" />
@@ -72,6 +72,7 @@
             </TreeView.ItemTemplate>
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="models:MultiSelectTreeView.IsItemSelected" Value="{Binding IsSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="TreeViewItem">
@@ -101,8 +102,12 @@
                                     <Trigger Property="HasItems" Value="False">
                                         <Setter TargetName="ItemToggle" Property="Visibility" Value="Hidden"></Setter>
                                     </Trigger>
-                                    <Trigger Property="IsSelected" Value="True">
+                                    <Trigger Property="models:MultiSelectTreeView.IsItemSelected" Value="True">
                                         <Setter TargetName="ItemHeader" Property="Background" Value="Red" />
+                                        <Setter Property="FontFamily" Value="{StaticResource Montserrat Bold}"/>
+                                    </Trigger>
+                                    <Trigger Property="models:MultiSelectTreeView.IsItemSelected" Value="False">
+                                        <Setter Property="FontFamily" Value="{StaticResource Montserrat}"/>
                                     </Trigger>
                                     <DataTrigger Binding="{Binding MatchFilter}" Value="False">
                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -124,7 +129,7 @@
                     </Style.Triggers>
                 </Style>
             </TreeView.ItemContainerStyle>
-        </TreeView>
+        </models:MultiSelectTreeView>
         <Grid x:Name="SearchPage">
             <Border Background="#CC000000" x:Name="BackgroundSearch" MouseUp="BackgroundSearch_MouseUp"/>
             <Border VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20 10"
@@ -179,6 +184,9 @@
                     </Button>
                     <Button x:Name="InsertBtn" Margin="5" Padding="5" Click="InsertItemBeforeSelected" ToolTip="Insert Above (Ctrl+I)">
                         <Image Source="/images/ic_insert_row.png"/>
+                    </Button>
+                    <Button x:Name="ReplaceBtn" Margin="5" Padding="5" Click="ReplaceBtn_Click" ToolTip="Replace With Copied Item (Ctrl+R)">
+                        <Image Source="/images/ic_swap.png"/>
                     </Button>
                     <Button x:Name="RemoveBtn" Margin="5" Padding="5" Click="RemoveItem"  ToolTip="Remove">
                         <Image Source="/images/ic_remove.png"/>

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows;
 using System.Windows.Media.Animation;
+using System.IO;
 
 namespace Aov_Mod_GUI.Models
 {
@@ -37,6 +38,43 @@ namespace Aov_Mod_GUI.Models
             Storyboard? sb = w.FindResource(storyboardKey) as Storyboard;
             if (sb != null)
                 sb.Begin();
+        }
+    }
+
+    internal static class PathExtension
+    {
+        /// <summary>
+        /// Combine paths to one and remove if end of this path equal start of another
+        /// </summary>
+        /// <returns>Path after combine</returns>
+        public static string Combine(params string[] paths)
+        {
+            string path = paths[0];
+            for (int i = 1; i < paths.Length-1; i++)
+            {
+                path = Combine(path, paths[i + 1]);
+            }
+            return path;
+        }
+
+        public static string Combine(string str1, string str2)
+        {
+            str1= str1.TrimEnd('/').TrimEnd('\\');
+            str2= str2.TrimStart('/').TrimStart('\\');
+            int maxLength = Math.Min(str1.Length, str2.Length);
+
+            // Iterate to find the longest matching substring
+            for (int i = maxLength; i > 0; i--)
+            {
+                if (str1.EndsWith(str2.Substring(0, i)))
+                {
+                    str2 = str2[i..];
+                    break;
+                }
+            }
+
+            // If no matching part, return the strings concatenated
+            return Path.Combine(str1,str2);
         }
     }
 }

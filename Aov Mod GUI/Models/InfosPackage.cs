@@ -14,9 +14,11 @@ namespace Aov_Mod_GUI.Models
         public Dictionary<string, PackageElement> Elements = [];
         private readonly DirectoryInfo? tempDir;
         private bool isPacked = true;
+        public string PackageTitle = "";
 
         public InfosPackage(string pkgPath)
         {
+            PackageTitle = Path.GetFileName(pkgPath);
             tempDir = Directory.CreateTempSubdirectory();
             if (!File.Exists(pkgPath))
                 return;

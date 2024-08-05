@@ -13,9 +13,11 @@ namespace Aov_Mod_GUI.Models
     {
         public Dictionary<string, ActionsXml> Projects = [];
         private readonly DirectoryInfo tempDir;
+        public string PackageTitle = "";
 
         public ProjectPackage(string pkgPath)
         {
+            PackageTitle = Path.GetFileName(pkgPath);
             tempDir = Directory.CreateTempSubdirectory();
             if (!File.Exists(pkgPath))
                 return;

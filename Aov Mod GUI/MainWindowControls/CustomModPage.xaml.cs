@@ -2,6 +2,7 @@
 using Aov_Mod_GUI.Models;
 using AovClass;
 using AovClass.Models;
+using Microsoft.Win32;
 using System;
 using System.Buffers.Text;
 using System.Diagnostics;
@@ -9,6 +10,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Xml;
 
 namespace Aov_Mod_GUI.MainWindowControls
 {
@@ -31,7 +33,18 @@ namespace Aov_Mod_GUI.MainWindowControls
         List<string> SoundKeyAcceptMulti = ["BattleBank.bytes"];
 
         bool _FolderGenerated = false;
-        bool FolderGenerated { get => _FolderGenerated; set { _FolderGenerated = value; MainWindow.SetCustomizingState(value); } }
+        bool FolderGenerated
+        {
+            get => _FolderGenerated; set
+            {
+                _FolderGenerated = value; MainWindow.SetCustomizingState(value);
+                IconFieldRow.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                LabelFieldRow.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                SoundNewIds.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                UpdateFromOlderBtn.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                CustomBtnResetRow.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
         string ParentSavePath = "";
         string iconPath { get => Path.Combine(ParentSavePath, "Databin/Client/Actor/heroSkin.bytes"); }
         string labelPath { get => Path.Combine(ParentSavePath, "Databin/Client/Shop/HeroSkinShop.bytes"); }
@@ -71,13 +84,190 @@ namespace Aov_Mod_GUI.MainWindowControls
         {
             InitializeComponent();
 
-            //CustomIconBtn.Click += CustomIconBtn_Click;
+            FolderGenerated = false;
+
             CustomInfoBtn.Click += CustomInfoBtn_Click;
             CustomActionBtn.Click += CustomActionBtn_Click;
             CustomCommonActionsBtn.Click += CustomCommonActionsBtn_Click;
-            //CustomSoundBtn.Click += CustomSoundBtn_Click;
-            //TestBtn.Click += TestBtn_Click;
-            CustomModControl.Visibility = Visibility.Collapsed;
+            UpdateFromOlderBtn.Click += UpdateFromOlderBtn_Click;
+        }
+
+        private void UpdateFromOlderBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (!FolderGenerated)
+                return;
+            OpenFolderDialog openFolderDialog = new() { Multiselect = false, Title = "Select folder that contains \"Ages\", \"Prefab_Characters\" " };
+            if (openFolderDialog.ShowDialog() == false)
+                return;
+            string parentPath = openFolderDialog.FolderName;
+            string infoPath = PathExtension.Combine(parentPath, $"Prefab_Characters\\Actor_{CustomHeroId.GetText()}_Infos.pkg.bytes");
+            string actionPath = PathExtension.Combine(parentPath, $"Ages\\Prefab_Characters\\Prefab_Hero\\Actor_{CustomHeroId.GetText()}_Actions.pkg.bytes");
+            string commonActionPath = PathExtension.Combine(ParentSavePath, "Ages\\Prefab_Characters\\Prefab_Hero\\CommonActions.pkg.bytes");
+            ProgressWindow progressWindow = new() { Owner = Window.GetWindow(this) };
+            progressWindow.SetCancelable(false);
+            progressWindow.Execute(() =>
+            {
+                #region UpdateInfo
+                if (File.Exists(infoPath) && infoElement != null)
+                {
+                    try
+                    {
+                        InfosPackage tempInfoPkg = new(infoPath);
+                        foreach (var pair in infoElement.Elements)
+                        {
+                            if (tempInfoPkg.Elements.ContainsKey(pair.Key))
+                            {
+                                UpdateTempInfo(pair.Value, tempInfoPkg.Elements[pair.Key]);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Update Info Error: " + ex.Message);
+                    }
+                }
+                #endregion
+                #region UpdateAction and Common action
+                if (File.Exists(actionPath) && heroActionsPkg != null)
+                {
+                    try
+                    {
+                        ProjectPackage tempPackage = new(actionPath);
+                        MessageBox.Show(actionPath);
+                        UpdateTempProject(heroActionsPkg, tempPackage);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Update Action Error: " + ex.Message);
+                    }
+                }
+                if (File.Exists(commonActionPath) && commonActionsPkg != null)
+                {
+                    try
+                    {
+                        ProjectPackage tempPackage = new(commonActionPath);
+                        List<string> KeyUpdates = [
+                            @"commonresource\Back.xml",
+                        @"commonresource\Born.xml",
+                        @"commonresource\Dance.xml",
+                        @"commonresource\HasteE1.xml",
+                        @"commonresource\HasteE1_leave.xml",
+                    ];
+                        UpdateTempProject(commonActionsPkg, tempPackage, (key) => KeyUpdates.FindIndex((k) => k.Equals(key, StringComparison.CurrentCultureIgnoreCase)) > -1);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Update Common Action Error: " + ex.Message);
+                    }
+                }
+                #endregion
+            });
+            progressWindow.ShowDialog();
+        }
+        private void UpdateTempInfo(PackageElement info, PackageElement tempInfo)
+        {
+            if (info._Name == tempInfo._Name)
+            {
+                if (info._JtType == "JTArr" || info._Type.Contains("list", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    if (info.Children == null || tempInfo.Children == null)
+                        return;
+                    int maxLength = Math.Min(info.Children.Count, tempInfo.Children.Count);
+                    for (int i = 0; i < maxLength; i++)
+                    {
+                        UpdateTempInfo(info.Children[i], tempInfo.Children[i]);
+                    }
+                }
+                else
+                {
+                    foreach (var child in info.Children ?? [])
+                    {
+                        PackageElement? tempChild = tempInfo.Children?.Find((c) => c._Name == child._Name);
+                        if (tempChild != null)
+                        {
+                            UpdateTempInfo(child, tempChild);
+                        }
+                    }
+                    if (info.Value != null && tempInfo.Value != null)
+                    {
+                        info.Value = [.. tempInfo.Value];
+                    }
+                }
+            }
+        }
+        private void UpdateTempProject(ProjectPackage package, ProjectPackage tempPackage, Func<string, bool>? keyFilter = null)
+        {
+            foreach (var pair in tempPackage.Projects)
+            {
+                if (keyFilter == null || !keyFilter(pair.Key) || !package.Projects.ContainsKey(pair.Key))
+                    continue;
+                var tempActions = pair.Value.GetActionNodes();
+                var project = package.Projects[pair.Key];
+                var actions = project.GetActionNodes();
+                if (tempActions == null || actions == null)
+                {
+                    continue;
+                }
+                foreach (XmlNode tempTrack in tempActions)
+                {
+                    XmlNode? track = actions.Find((node) => node.GetAttribute("guid") == tempTrack.GetAttribute("guid"));
+                    if (track != null)
+                    {
+                        UpdateTempAction(track, tempTrack);
+                    }
+                    else
+                    {
+                        project.AppendActionNode(tempTrack);
+                    }
+                }
+            }
+        }
+        private void UpdateTempAction(XmlNode node, XmlNode tempNode)
+        {
+            if (node.Name == "Track" && tempNode.Name == "Track")
+            {
+                if (node.GetAttribute("guid") == tempNode.GetAttribute("guid"))
+                {
+                    List<XmlNode> children = node.ChildNodes.Cast<XmlNode>().Where((node) => node.Name == "Condition").ToList();
+                    foreach (XmlNode tempChild in tempNode.ChildNodes)
+                    {
+                        if (tempChild.Name == "Condition" && children.Find((cond) => cond.GetAttribute("guid") != tempChild.GetAttribute("guid")) == null)
+                        {
+                            XmlNode? condi = node.OwnerDocument?.ImportNode(tempChild, true);
+                            if (condi != null)
+                                node.AppendChild(condi);
+                        }
+                    }
+                    XmlNode? eventNode = node.GetChildrenByName("Event")?[0],
+                        tempEventNode = tempNode.GetChildrenByName("Event")?[0];
+                    if (eventNode != null && tempEventNode != null)
+                        UpdateTempAction(eventNode, tempEventNode);
+                }
+            }
+            else if (node.Name == "Event" && tempNode.Name == "Event")
+            {
+                List<XmlNode> paramList = node.ChildNodes.Cast<XmlNode>().ToList();
+                foreach (XmlNode tempParam in tempNode.ChildNodes)
+                {
+                    XmlNode? param = paramList.Find((p) => p.GetAttribute("name") == tempParam.GetAttribute("name"));
+                    if (param != null)
+                    {
+                        UpdateTempAction(param, tempParam);
+                    }
+                    else
+                    {
+                        XmlNode? clone = node.OwnerDocument?.ImportNode(tempParam, true);
+                        if (clone != null)
+                            node.AppendChild(clone);
+                    }
+                }
+            }
+            else if (node.GetAttribute("name") == tempNode.GetAttribute("name"))
+            {
+                node = tempNode.CloneNode(true);
+                Trace.WriteLine("updated " + node.GetAttribute("name") + " from " + node.GetAttribute("value") + " to " +
+                    tempNode.GetAttribute("value"));
+            }
         }
 
         private void CustomCommonActionsBtn_Click(object sender, RoutedEventArgs e)
@@ -93,54 +283,54 @@ namespace Aov_Mod_GUI.MainWindowControls
 
         private void CustomActionBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (heroActionsPkg == null)
+            if (FolderGenerated)
             {
-                MessageBox.Show("Hero Action Package bằng null!!", "Lỗi");
-                return;
+                if (heroActionsPkg == null)
+                {
+                    MessageBox.Show("Hero Action Package bằng null!!", "Lỗi");
+                    return;
+                }
+                CusProjectXml cusProject = new(heroActionsPkg);
+                cusProject.Show();
             }
-            CusProjectXml cusProject = new(heroActionsPkg);
-            cusProject.Show();
-        }
-
-        private void TestBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (!FolderGenerated)
-                return;
-
-        }
-
-        private void CustomSoundBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (soundWps == null)
+            else
             {
-                return;
+                CusProjectXml cusProject = new();
+                try
+                {
+                    cusProject.Show();
+                }
+                catch
+                {
+
+                }
             }
-            CusSounds cusSounds = new CusSounds(soundWps);
-            cusSounds.Show();
         }
 
         private void CustomInfoBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (infoElement == null)
+            if (FolderGenerated)
             {
-                MessageBox.Show("Info Element bằng null!!", "Lỗi");
-                return;
+                if (infoElement == null)
+                {
+                    MessageBox.Show("Info Element bằng null!!", "Lỗi");
+                    return;
+                }
+                CusInfos cusInfos = new(infoElement);
+                cusInfos.Show();
             }
-            CusInfos cusInfos = new(infoElement);
-            cusInfos.Show();
-        }
+            else
+            {
+                CusInfos cusInfos = new();
+                try
+                {
+                    cusInfos.Show();
+                }
+                catch
+                {
 
-        private void CustomIconBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (!FolderGenerated)
-            {
-                MessageBox.Show("Chưa khởi tạo folder mod!");
-                return;
+                }
             }
-            CusIcon cusIconWd = new(CustomSkinName.GetText(), iconWp, labelWp) { Owner = Window.GetWindow(this) };
-            int hero = int.Parse(CustomHeroId.GetText());
-            cusIconWd.SetOldSkins(GetSkinLevelA(hero));
-            cusIconWd.ShowDialog();
         }
 
         private void GenerateModFolder_Click(object sender, RoutedEventArgs e)
@@ -284,7 +474,8 @@ namespace Aov_Mod_GUI.MainWindowControls
                 LabelCombobox.ItemsSource = sources;
             }
             CustomModControl.Visibility = Visibility.Visible;
-            OldSkins = (GetSkinLevelA(int.Parse(CustomHeroId.GetText())) ?? []);
+            OldSkins = [new(int.Parse(CustomHeroId.Text), "Default")];
+            OldSkins = heroes?.Find((hero) => hero.Id == int.Parse(CustomHeroId.GetText()))?.Skins ?? [];
             string InfosPath = infoPath,
                 AssetRefPath = assetrefPath,
                 HeroActionsPath = heroActionsPath;
@@ -332,7 +523,6 @@ namespace Aov_Mod_GUI.MainWindowControls
             IconNewId.Text = "";
             SoundNewIds.Text = "";
             LabelCombobox.SelectedIndex = -1;
-            CustomModControl.Visibility = Visibility.Collapsed;
         }
 
         private byte[] GetAovBytesFrom(string path)
@@ -452,14 +642,20 @@ namespace Aov_Mod_GUI.MainWindowControls
                     {
                         targetSounds = new(modSources?.SpecialSoundElements[soundId][pair.Key.ToLower()] ?? []);
                     }
-                    if (targetSounds == null)
+                    foreach (Skin oldSkin in OldSkins)
                     {
-                        int targetId = int.Parse(soundId.ToString()[..3]) * 100 + int.Parse(soundId.ToString()[3..]) - 1;
-                        soundWps[pair.Key].copySound(heroId * 100, targetId, false);
-                    }
-                    else
-                    {
-                        soundWps[pair.Key].setSound(heroId * 100, targetSounds.soundElements);
+                        if (oldSkin.Id == null) continue;
+                        int oldSkinId = (int)oldSkin.Id;
+                        int oldSoundId = int.Parse(oldSkinId.ToString()[..3]) * 100 + int.Parse(oldSkinId.ToString()[3..]) - 1;
+                        if (targetSounds == null)
+                        {
+                            int targetId = int.Parse(soundId.ToString()[..3]) * 100 + int.Parse(soundId.ToString()[3..]) - 1;
+                            soundWps[pair.Key].copySound(oldSoundId, targetId, i == 0);
+                        }
+                        else
+                        {
+                            soundWps[pair.Key].setSound(oldSoundId, targetSounds.soundElements);
+                        }
                     }
                     if (SoundKeyAcceptMulti.FindIndex((key) => key.Equals(pair.Key, StringComparison.CurrentCultureIgnoreCase)) == -1)
                     {
@@ -489,13 +685,13 @@ namespace Aov_Mod_GUI.MainWindowControls
                 }
                 c++;
             }
-            var result = MessageBox
-                .Show("Sau khi hoàn thành mod sẽ reset toàn bộ custom fields! Xác nhận không?"
-                , "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
-            if (result == MessageBoxResult.No)
-            {
-                return;
-            }
+            //var result = MessageBox
+            //    .Show("Sau khi hoàn thành mod sẽ reset toàn bộ custom fields! Xác nhận không?"
+            //    , "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+            //if (result == MessageBoxResult.No)
+            //{
+            //    return;
+            //}
             string InfosPath = infoPath,
                 AssetRefPath = assetrefPath,
                 HeroActionsPath = heroActionsPath,

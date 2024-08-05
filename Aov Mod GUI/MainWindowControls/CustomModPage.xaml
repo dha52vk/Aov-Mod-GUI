@@ -24,7 +24,7 @@
         <Separator Margin="10"/>
 
         <StackPanel x:Name="CustomModControl">
-            <Grid>
+            <Grid x:Name="IconFieldRow">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="70"/>
@@ -51,7 +51,7 @@
             </Grid>
             <!--<aov_mod_gui:PathTextedit x:Name="LabelNewId" PathLabel="Label New Id: "
         FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
-            <Grid Margin="10 0">
+            <Grid Margin="10 0" x:Name="LabelFieldRow">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" MaxWidth="250"/>
                     <ColumnDefinition Width="2*"/>
@@ -72,12 +72,14 @@
             FontSize="15" FontFamily="{StaticResource Montserrat}"/>
             <Button x:Name="CustomCommonActionsBtn" Content="Custom Common Actions" Padding="10"  Margin="10 5"
             FontSize="15" FontFamily="{StaticResource Montserrat}"/>
+            <Button x:Name="UpdateFromOlderBtn" Content="Update From Older version" Padding="10"  Margin="10 5"
+            FontSize="15" FontFamily="{StaticResource Montserrat}"/>
             <!--<Button x:Name="CustomSoundBtn" Content="Custom Actor Sound" Padding="10"  Margin="10 5"
             FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
 
             <Separator Margin="10 10 10 15"/>
 
-            <Grid>
+            <Grid x:Name="CustomBtnResetRow">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>

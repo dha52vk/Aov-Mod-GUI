@@ -191,7 +191,7 @@
                     <Button x:Name="InsertBtn" Margin="5" Padding="5" Click="InsertItemBeforeSelected" ToolTip="Insert Above (Ctrl+I)">
                         <Image Source="/images/ic_insert_row.png"/>
                     </Button>
-                    <Button x:Name="InsertTemplateBtn" Margin="5" Padding="5" Click="" ToolTip="Insert Above (Ctrl+I)">
+                    <Button x:Name="InsertTemplateBtn" Margin="5" Padding="5" ToolTip="Insert Above (Ctrl+I)">
                         <Image Source="/images/ic_add.png"/>
                     </Button>
                     <Button x:Name="ReplaceBtn" Margin="5" Padding="5" Click="ReplaceBtn_Click" ToolTip="Replace With Copied Item (Ctrl+R)">

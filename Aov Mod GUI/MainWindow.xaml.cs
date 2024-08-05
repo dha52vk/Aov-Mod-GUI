@@ -295,16 +295,18 @@ namespace Aov_Mod_GUI
                 content += $"  + {skin.Name}\n";
                 var oldSkins = GetSkinLevelA(int.Parse(skin.Id.ToString()?[..3] ?? "-1"));
                 if (oldSkins != null)
-                    modList.Add(new(oldSkins, skin, ModSettings.AllEnable) ) ;
+                    modList.Add(new(oldSkins, skin, ModSettings.AllEnable));
             }
-            ProgressWindow progressWindow = new() { Owner=this, IsIndeterminate=true };
+            ProgressWindow progressWindow = new() { Owner = this, IsIndeterminate = true };
             progressWindow.SetCancelable(false);
             progressWindow.Execute(() =>
             {
-                progressWindow.UpdateProgress(0,"Modding...");
-                string packname = "PackMod_" + DateTime.Now.ToString("MM.dd.yyyy HH:mm:ss");
-                modController?.ModSkin(modList, packname);
-                File.WriteAllText(Path.Combine(modSources?.SaveModPath??"", ModController.MakeSimpleString(packname), "packinfo.txt"), content);
+                if (modController != null){
+                    modController.UpdateProgress = (status) => progressWindow.UpdateProgress(0, status);
+                    string packname = "PackMod_" + DateTime.Now.ToString("MM.dd.yyyy HH:mm:ss");
+                    modController.ModSkin(modList, packname);
+                    File.WriteAllText(Path.Combine(modSources?.SaveModPath ?? "", ModController.MakeSimpleString(packname), "packinfo.txt"), content);
+                }
             });
             progressWindow.ShowDialog();
         }

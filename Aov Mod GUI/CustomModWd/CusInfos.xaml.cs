@@ -1,5 +1,6 @@
 ﻿using Aov_Mod_GUI.Models;
 using AovClass;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,12 +27,13 @@ namespace Aov_Mod_GUI.CustomModWd
     {
         ModSources? modSources { get => MainWindow.GetModSources(); }
         readonly InfosPackage infosPackage;
-        public static InfoItem[]? ItemsCopied { get; set; }
+        public static List<InfoItem>? ItemsCopied { get; set; }
         ObservableCollection<InfoItem> itemSources = [];
         bool _IsReadOnly = false;
+        string? SavePackagePath = null;
         public bool IsReadOnly
         {
-            get => _IsReadOnly; 
+            get => _IsReadOnly;
             set
             {
                 PasteBtn.IsEnabled = !value;
@@ -55,15 +57,37 @@ namespace Aov_Mod_GUI.CustomModWd
             }
         }
 
+        public CusInfos()
+        {
+            InitializeComponent();
+            OpenFileDialog openFileDialog = new() { CheckFileExists = true, Multiselect = true };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                SavePackagePath = openFileDialog.FileName;
+                infosPackage = new InfosPackage(SavePackagePath);
+                Init();
+            }
+            else
+            {
+                Close();
+            }
+        }
+
         public CusInfos(InfosPackage infosPackage)
         {
             InitializeComponent();
+            this.infosPackage = infosPackage;
+            Init();
+        }
+
+        public void Init()
+        {
             SearchPage.Visibility = Visibility.Collapsed;
             ShowOtherPage.Visibility = Visibility.Collapsed;
             ClearFilterBtn.Visibility = Visibility.Collapsed;
 
+            this.Title = infosPackage.PackageTitle;
             ItemsCopied = [];
-            this.infosPackage = infosPackage;
             ReloadSources();
         }
 
@@ -80,7 +104,7 @@ namespace Aov_Mod_GUI.CustomModWd
             {
                 OtherInfosCombobox.ItemsSource = Directory.GetFiles(modSources.InfosParentPath)
                     .Select((filePath) => Path.GetFileName(filePath))
-                    .Where((filename)=>filename.StartsWith("Actor", StringComparison.CurrentCultureIgnoreCase));
+                    .Where((filename) => filename.StartsWith("Actor", StringComparison.CurrentCultureIgnoreCase));
             }
         }
 
@@ -111,6 +135,10 @@ namespace Aov_Mod_GUI.CustomModWd
                 {
                     InsertItemBeforeSelected(new(), new());
                 }
+                else if (Keyboard.IsKeyDown(Key.R))
+                {
+                    ReplaceBtn_Click(new(), new());
+                }
             }
             else
             {
@@ -127,16 +155,17 @@ namespace Aov_Mod_GUI.CustomModWd
 
         private void CopyItem(object sender, RoutedEventArgs e)
         {
+            List<InfoItem>? selectedItems = InfosTreeView.SelectedItems.Cast<InfoItem>().ToList();
             if (InfosTreeView.SelectedItem == null || !(InfosTreeView.SelectedItem is InfoItem item))
                 return;
-            ItemsCopied = [item];
+            ItemsCopied = selectedItems ?? [];
         }
 
         private void CopyAllChildItem(object sender, RoutedEventArgs e)
         {
             if (InfosTreeView.SelectedItem == null)
                 return;
-            ItemsCopied = (InfosTreeView.SelectedItem as InfoItem)?.Children.ToArray();
+            ItemsCopied = (InfosTreeView.SelectedItem as InfoItem)?.Children.ToList();
         }
 
         private void PasteItemAsChild(object sender, RoutedEventArgs e)
@@ -165,6 +194,20 @@ namespace Aov_Mod_GUI.CustomModWd
             }
         }
 
+        private void ReplaceBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (IsReadOnly)
+                return;
+            InfoItem? selectedItem = InfosTreeView.SelectedItem as InfoItem;
+            if (selectedItem == null || ItemsCopied == null || selectedItem.Parent == null)
+                return;
+            foreach (var item in ItemsCopied)
+            {
+                selectedItem.Parent.InsertChildBefore(new(item.infoElement, selectedItem.Parent), selectedItem);
+            }
+            selectedItem.Parent.RemoveChild(selectedItem);
+        }
+
         private void RemoveItem(object sender, RoutedEventArgs e)
         {
             if (IsReadOnly)
@@ -177,7 +220,20 @@ namespace Aov_Mod_GUI.CustomModWd
 
         private void SaveInfoBtn_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            if (IsReadOnly)
+            {
+                Close();
+                return;
+            }
+
+            if (string.IsNullOrEmpty(SavePackagePath))
+            {
+                Close();
+            }
+            else
+            {
+                infosPackage.SaveTo(SavePackagePath);
+            }
         }
 
         private void EditBtn_Click(object sender, RoutedEventArgs e)
@@ -321,13 +377,18 @@ namespace Aov_Mod_GUI.CustomModWd
         {
             InfoItem? item = Children.Where((child) => child.infoElement._Name.
                         Equals(newChild.infoElement._Name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
-            if (item != null)
+            bool isChildOfJtArr = ((item?.infoElement._Name?.Equals("Element") ?? false) && infoElement._JtType == "JTArr");
+            if (item != null && !isChildOfJtArr)
             {
                 RemoveChild(item);
             }
             int index = Children.ToList().FindIndex((child) => child == refChild);
             if (index < 0)
+            {
                 return;
+            }
+            if (isChildOfJtArr)
+                newChild.Name = refChild.Name;
             Children.Insert(index, newChild);
             infoElement.InsertChild(index, newChild.infoElement);
         }
@@ -336,7 +397,7 @@ namespace Aov_Mod_GUI.CustomModWd
         {
             InfoItem? item = Children.Where((child) => child.infoElement._Name.
                         Equals(newChild.infoElement._Name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
-            if (item != null)
+            if (item != null || ((item?._Name?.Equals("Element") ?? false) && infoElement._JtType == "JTArr"))
             {
                 RemoveChild(item);
             }
