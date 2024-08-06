@@ -33,11 +33,29 @@ namespace Aov_Mod_GUI.Models
             return child;
         }
 
-        public static void PlayStoryBoard(this Window w,string storyboardKey)
+        public static void PlayStoryBoard(this Window w, string storyboardKey)
         {
             Storyboard? sb = w.FindResource(storyboardKey) as Storyboard;
             if (sb != null)
                 sb.Begin();
+        }
+    }
+
+    internal static class LogExtension
+    {
+        private static bool FirstLog = true;
+        public static void Log(string logMessage)
+        {
+            if (FirstLog)
+            {
+                if (File.Exists("log.txt"))
+                    File.Delete("log.txt");
+                FirstLog = false;
+            }
+            //string logFilePath = "log.txt";
+            //if (!File.Exists(logFilePath))
+            //    File.Create(logFilePath);
+            File.AppendAllText("log.txt", DateTime.Now.ToString("[MM/dd/yyyy HH:mm:ss]") + "   " + logMessage.TrimStart().TrimEnd() + "\n");
         }
     }
 
@@ -50,7 +68,7 @@ namespace Aov_Mod_GUI.Models
         public static string Combine(params string[] paths)
         {
             string path = paths[0];
-            for (int i = 1; i < paths.Length-1; i++)
+            for (int i = 1; i < paths.Length - 1; i++)
             {
                 path = Combine(path, paths[i + 1]);
             }
@@ -59,8 +77,8 @@ namespace Aov_Mod_GUI.Models
 
         public static string Combine(string str1, string str2)
         {
-            str1= str1.TrimEnd('/').TrimEnd('\\');
-            str2= str2.TrimStart('/').TrimStart('\\');
+            str1 = str1.TrimEnd('/').TrimEnd('\\');
+            str2 = str2.TrimStart('/').TrimStart('\\');
             int maxLength = Math.Min(str1.Length, str2.Length);
 
             // Iterate to find the longest matching substring
@@ -74,7 +92,7 @@ namespace Aov_Mod_GUI.Models
             }
 
             // If no matching part, return the strings concatenated
-            return Path.Combine(str1,str2);
+            return Path.Combine(str1, str2);
         }
     }
 }

@@ -124,10 +124,12 @@
                         </Grid>
                     </Grid>
 
-                    <Grid x:Name="SettingsPage" Visibility="Collapsed">
-                        <StackPanel>
-                            
-                        </StackPanel>
+                    <Grid x:Name="SettingsPage" Visibility="Visible">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <Button x:Name="EditSkinListBtn"/>
+                            </StackPanel>
+                        </ScrollViewer> 
                     </Grid>
                     
                     <Grid x:Name="ImportPage" Visibility="Collapsed">
@@ -149,7 +151,7 @@
                         </Grid>
                     </Grid>
 
-                    <Grid x:Name="CustomPage" Visibility="Visible">
+                    <Grid x:Name="CustomPage" Visibility="Collapsed">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
                             <mainwindowcontrols:CustomModPage x:Name="MainCustomModPage"/>
                         </ScrollViewer>

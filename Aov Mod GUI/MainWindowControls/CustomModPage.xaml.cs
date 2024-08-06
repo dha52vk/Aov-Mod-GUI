@@ -43,6 +43,9 @@ namespace Aov_Mod_GUI.MainWindowControls
                 SoundNewIds.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
                 UpdateFromOlderBtn.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
                 CustomBtnResetRow.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                FolderSavePath.SetReadOnly(value);
+                CustomHeroId.SetReadOnly(value);
+                CustomSkinName.SetReadOnly(value);
             }
         }
         string ParentSavePath = "";
@@ -102,12 +105,14 @@ namespace Aov_Mod_GUI.MainWindowControls
             string parentPath = openFolderDialog.FolderName;
             string infoPath = PathExtension.Combine(parentPath, $"Prefab_Characters\\Actor_{CustomHeroId.GetText()}_Infos.pkg.bytes");
             string actionPath = PathExtension.Combine(parentPath, $"Ages\\Prefab_Characters\\Prefab_Hero\\Actor_{CustomHeroId.GetText()}_Actions.pkg.bytes");
-            string commonActionPath = PathExtension.Combine(ParentSavePath, "Ages\\Prefab_Characters\\Prefab_Hero\\CommonActions.pkg.bytes");
+            string commonActionPath = PathExtension.Combine(parentPath, "Ages\\Prefab_Characters\\Prefab_Hero\\CommonActions.pkg.bytes");
             ProgressWindow progressWindow = new() { Owner = Window.GetWindow(this) };
             progressWindow.SetCancelable(false);
+            progressWindow.SetProgressMaxium(3);
             progressWindow.Execute(() =>
             {
                 #region UpdateInfo
+                progressWindow.UpdateProgress(0, "Updating Info package");
                 if (File.Exists(infoPath) && infoElement != null)
                 {
                     try
@@ -127,13 +132,13 @@ namespace Aov_Mod_GUI.MainWindowControls
                     }
                 }
                 #endregion
-                #region UpdateAction and Common action
+                #region UpdateAction
+                progressWindow.UpdateProgress(1, "Updating Hero Action package");
                 if (File.Exists(actionPath) && heroActionsPkg != null)
                 {
                     try
                     {
                         ProjectPackage tempPackage = new(actionPath);
-                        MessageBox.Show(actionPath);
                         UpdateTempProject(heroActionsPkg, tempPackage);
                     }
                     catch (Exception ex)
@@ -141,6 +146,9 @@ namespace Aov_Mod_GUI.MainWindowControls
                         MessageBox.Show("Update Action Error: " + ex.Message);
                     }
                 }
+                #endregion
+                #region Update Common action
+                progressWindow.UpdateProgress(2, "Updating Common Action package");
                 if (File.Exists(commonActionPath) && commonActionsPkg != null)
                 {
                     try
@@ -148,11 +156,11 @@ namespace Aov_Mod_GUI.MainWindowControls
                         ProjectPackage tempPackage = new(commonActionPath);
                         List<string> KeyUpdates = [
                             @"commonresource\Back.xml",
-                        @"commonresource\Born.xml",
-                        @"commonresource\Dance.xml",
-                        @"commonresource\HasteE1.xml",
-                        @"commonresource\HasteE1_leave.xml",
-                    ];
+                            @"commonresource\Born.xml",
+                            @"commonresource\Dance.xml",
+                            @"commonresource\HasteE1.xml",
+                            @"commonresource\HasteE1_leave.xml",
+                        ];
                         UpdateTempProject(commonActionsPkg, tempPackage, (key) => KeyUpdates.FindIndex((k) => k.Equals(key, StringComparison.CurrentCultureIgnoreCase)) > -1);
                     }
                     catch (Exception ex)
@@ -177,15 +185,26 @@ namespace Aov_Mod_GUI.MainWindowControls
                     {
                         UpdateTempInfo(info.Children[i], tempInfo.Children[i]);
                     }
+                    if (maxLength < tempInfo.Children.Count)
+                    {
+                        for (int i = maxLength; i < tempInfo.Children.Count; i++)
+                        {
+                            info.AddChild(tempInfo.Children[i]);
+                        }
+                    }
                 }
                 else
                 {
-                    foreach (var child in info.Children ?? [])
+                    foreach (var tempChild in tempInfo.Children ?? [])
                     {
-                        PackageElement? tempChild = tempInfo.Children?.Find((c) => c._Name == child._Name);
-                        if (tempChild != null)
+                        PackageElement? child = info.Children?.Find((c) => c._Name == tempChild._Name);
+                        if (child != null)
                         {
                             UpdateTempInfo(child, tempChild);
+                        }
+                        else
+                        {
+                            info.AddChild(tempChild);
                         }
                     }
                     if (info.Value != null && tempInfo.Value != null)
@@ -199,8 +218,12 @@ namespace Aov_Mod_GUI.MainWindowControls
         {
             foreach (var pair in tempPackage.Projects)
             {
-                if (keyFilter == null || !keyFilter(pair.Key) || !package.Projects.ContainsKey(pair.Key))
+                if ((keyFilter != null && !keyFilter(pair.Key)) || !package.Projects.ContainsKey(pair.Key))
+                {
+                    LogExtension.Log("Skipped " + pair.Key);
                     continue;
+                }
+                LogExtension.Log("Updating " + pair.Key);
                 var tempActions = pair.Value.GetActionNodes();
                 var project = package.Projects[pair.Key];
                 var actions = project.GetActionNodes();
@@ -208,18 +231,58 @@ namespace Aov_Mod_GUI.MainWindowControls
                 {
                     continue;
                 }
-                foreach (XmlNode tempTrack in tempActions)
+                int i, j;
+                for (i = 0, j = 0; i < tempActions.Count && j < actions.Count; i++, j++)
                 {
-                    XmlNode? track = actions.Find((node) => node.GetAttribute("guid") == tempTrack.GetAttribute("guid"));
-                    if (track != null)
+                    if (tempActions[i].Attributes == null)
                     {
-                        UpdateTempAction(track, tempTrack);
+                        continue;
                     }
-                    else
+                    var tempAction = tempActions[i];
+                    int find = actions.FindIndex((track) => track.Attributes != null && track.GetAttribute("guid") == tempAction.GetAttribute("guid"));
+                    if (find > j)
                     {
-                        project.AppendActionNode(tempTrack);
+                        j = find;
+                        Trace.WriteLine("Updated action index to " + j);
                     }
+                    var action = actions[j];
+                    LogExtension.Log($"Comparing {j} - {i}: " + action.GetAttribute("trackName") + " - " + tempAction.GetAttribute("trackName"));
+                    if (action.GetAttribute("guid") != tempAction.GetAttribute("guid"))
+                    {
+                        project.InsertActionNode(j, tempAction);
+                        var list = project.GetActionNodes();
+                        if (list != null) actions = list;
+                        continue;
+                    }
+                    UpdateTempAction(action, tempAction);
                 }
+                while (i < tempActions.Count)
+                {
+                    if (tempActions[i].Attributes != null)
+                    {
+                        LogExtension.Log("Added New Action Temp: " + tempActions[i].GetAttribute("trackName"));
+                        project.AppendActionNode(tempActions[i]);
+                    }
+                    i++;
+                }
+                //foreach (XmlNode tempTrack in tempActions)
+                //{
+                //    if (tempTrack.Attributes == null)
+                //    {
+                //        continue;
+                //    }
+                //    XmlNode? track = actions.Find((node) => node.GetAttribute("guid") == tempTrack.GetAttribute("guid"));
+                //    if (track != null)
+                //    {
+                //        UpdateTempAction(track, tempTrack);
+                //    }
+                //    else
+                //    {
+                //        project.AppendActionNode(tempTrack);
+                //        Trace.WriteLine("Added action " + tempTrack.GetAttribute("trackName"));
+                //        LogExtension.Log("Added action " + tempTrack.GetAttribute("trackName"));
+                //    }
+                //}
             }
         }
         private void UpdateTempAction(XmlNode node, XmlNode tempNode)
@@ -231,11 +294,14 @@ namespace Aov_Mod_GUI.MainWindowControls
                     List<XmlNode> children = node.ChildNodes.Cast<XmlNode>().Where((node) => node.Name == "Condition").ToList();
                     foreach (XmlNode tempChild in tempNode.ChildNodes)
                     {
-                        if (tempChild.Name == "Condition" && children.Find((cond) => cond.GetAttribute("guid") != tempChild.GetAttribute("guid")) == null)
+                        if (tempChild.Name == "Condition" && children.Find((cond) => cond.GetAttribute("guid") == tempChild.GetAttribute("guid")) == null)
                         {
                             XmlNode? condi = node.OwnerDocument?.ImportNode(tempChild, true);
                             if (condi != null)
-                                node.AppendChild(condi);
+                            {
+                                node.InsertChild(0,condi);
+                                LogExtension.Log("Added condition " + condi.GetAttribute("guid") + " to " + node.GetAttribute("trackName") + $"({node.GetAttribute("guid")})");
+                            }
                         }
                     }
                     XmlNode? eventNode = node.GetChildrenByName("Event")?[0],
@@ -246,10 +312,9 @@ namespace Aov_Mod_GUI.MainWindowControls
             }
             else if (node.Name == "Event" && tempNode.Name == "Event")
             {
-                List<XmlNode> paramList = node.ChildNodes.Cast<XmlNode>().ToList();
                 foreach (XmlNode tempParam in tempNode.ChildNodes)
                 {
-                    XmlNode? param = paramList.Find((p) => p.GetAttribute("name") == tempParam.GetAttribute("name"));
+                    XmlNode? param = node.ChildNodes.Cast<XmlNode>().ToList().Find((p) => p.GetAttribute("name") == tempParam.GetAttribute("name"));
                     if (param != null)
                     {
                         UpdateTempAction(param, tempParam);
@@ -258,15 +323,27 @@ namespace Aov_Mod_GUI.MainWindowControls
                     {
                         XmlNode? clone = node.OwnerDocument?.ImportNode(tempParam, true);
                         if (clone != null)
+                        {
+                            Trace.WriteLine("Appended param " + clone.GetAttribute("name") + ": " + clone.GetAttribute("value"));
+                            LogExtension.Log("Appended param " + clone.GetAttribute("name") + ": " + clone.GetAttribute("value"));
                             node.AppendChild(clone);
+                        }
                     }
                 }
             }
             else if (node.GetAttribute("name") == tempNode.GetAttribute("name"))
             {
-                node = tempNode.CloneNode(true);
-                Trace.WriteLine("updated " + node.GetAttribute("name") + " from " + node.GetAttribute("value") + " to " +
-                    tempNode.GetAttribute("value"));
+                if (node.GetAttribute("value") != tempNode.GetAttribute("value"))
+                {
+                    Trace.WriteLine("Updated " + node.GetAttribute("name") + " from " + node.GetAttribute("value") + " to "
+                        + tempNode.GetAttribute("value"));
+                    LogExtension.Log("Updated " + node.GetAttribute("name") + " from " + node.GetAttribute("value") + " to "
+                        + tempNode.GetAttribute("value"));
+                }
+                XmlNode? clone = node.OwnerDocument?.ImportNode(tempNode, true);
+                if (clone != null)
+                    node.ParentNode?.InsertBefore(clone, node);
+                node.ParentNode?.RemoveChild(node);
             }
         }
 

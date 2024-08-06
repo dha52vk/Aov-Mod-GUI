@@ -33,13 +33,7 @@ namespace Aov_Mod_GUI
         private static ModController? modController;
         public ObservableCollection<Skin>? SkinsSelected = [];
 
-        public List<SizeChangeValue> sizeChangeValues =
-        [
-            new SizeChangeValue(){MaxWidth=int.MaxValue, ListItemColumns=8},
-            new SizeChangeValue(){MaxWidth=1200, ListItemColumns=7},
-            new SizeChangeValue(){MaxWidth=1000, ListItemColumns=6},
-            new SizeChangeValue(){MaxWidth=700, ListItemColumns=5}
-        ];
+        public int MaxGridColumn=150;
 
         public UniformGrid? ListItemUniformGrid;
         public UniformGrid? ListSkinSelectedUniformGrid;
@@ -144,18 +138,10 @@ namespace Aov_Mod_GUI
         private void MainWd_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             int width = (int)Math.Round(e.NewSize.Width);
-            int i;
-            for (i = 0; i < sizeChangeValues.Count; i++)
-            {
-                if (sizeChangeValues[i].MaxWidth < width)
-                {
-                    break;
-                }
-            }
-            SizeChangeValue value = sizeChangeValues[i - 1];
+            int col = (int) Math.Ceiling((double)width / MaxGridColumn);
             if (ListItemUniformGrid != null)
             {
-                ListItemUniformGrid.Columns = value.ListItemColumns;
+                ListItemUniformGrid.Columns = col;
             }
         }
 
@@ -404,11 +390,5 @@ namespace Aov_Mod_GUI
                 return false;
             }
         }
-    }
-
-    public class SizeChangeValue
-    {
-        public int MaxWidth { get; set; }
-        public int ListItemColumns { get; set; }
     }
 }
