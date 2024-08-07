@@ -551,7 +551,7 @@ namespace Aov_Mod_GUI.MainWindowControls
                 LabelCombobox.ItemsSource = sources;
             }
             CustomModControl.Visibility = Visibility.Visible;
-            OldSkins = [new(int.Parse(CustomHeroId.Text), "Default")];
+            OldSkins = [new(){Id=int.Parse(CustomHeroId.Text), Label = "Default", Name=""}];
             OldSkins = heroes?.Find((hero) => hero.Id == int.Parse(CustomHeroId.GetText()))?.Skins ?? [];
             string InfosPath = infoPath,
                 AssetRefPath = assetrefPath,
@@ -721,7 +721,6 @@ namespace Aov_Mod_GUI.MainWindowControls
                     }
                     foreach (Skin oldSkin in OldSkins)
                     {
-                        if (oldSkin.Id == null) continue;
                         int oldSkinId = (int)oldSkin.Id;
                         int oldSoundId = int.Parse(oldSkinId.ToString()[..3]) * 100 + int.Parse(oldSkinId.ToString()[3..]) - 1;
                         if (targetSounds == null)
@@ -831,16 +830,6 @@ namespace Aov_Mod_GUI.MainWindowControls
                 return;
             }
             ResetCustomFields();
-        }
-
-        public List<Skin>? GetSkinLevelA(int heroId)
-        {
-            Hero? hero = heroes?.Find((hero) => hero.Id == heroId);
-            if (hero == null || skinLvWp == null)
-                return null;
-            List<Skin> skin = [new Skin(heroId * 10 + 1, "Default")];
-            skin.AddRange(hero?.Skins?.Where((skin) => skinLvWp.GetSkinLevel(skin) <= (int)DefaultLevel.A) ?? []);
-            return skin;
         }
     }
 }

@@ -22,6 +22,7 @@
     <None Remove="images\ic_paste_as_child.png" />
     <None Remove="images\ic_paste_in_same_parent.png" />
     <None Remove="images\ic_popup_wd.png" />
+    <None Remove="images\ic_radar.png" />
     <None Remove="images\ic_remove.png" />
     <None Remove="images\ic_rightarrow.png" />
     <None Remove="images\ic_search.png" />
@@ -92,6 +93,7 @@
     <Resource Include="images\ic_paste_as_child.png" />
     <Resource Include="images\ic_paste_in_same_parent.png" />
     <Resource Include="images\ic_popup_wd.png" />
+    <Resource Include="images\ic_radar.png" />
     <Resource Include="images\ic_remove.png" />
     <Resource Include="images\ic_rightarrow.png" />
     <Resource Include="images\ic_search.png" />

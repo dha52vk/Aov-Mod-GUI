@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -37,6 +38,7 @@ namespace Aov_Mod_GUI
             {
                 if (progressPercent >= MainProgressBar.Maximum)
                 {
+                    SystemSounds.Asterisk.Play();
                     Close();
                 }
                 MainProgressBar.Value = progressPercent;

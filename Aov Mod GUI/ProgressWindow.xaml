@@ -21,6 +21,6 @@
                      Maximum="100" Minimum="0"/>
         <Button x:Name="CancelBtn" Grid.Row="2" Content="Cancel" Padding="20 5"
                 HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 15 0"
-                Click="CancelBtn_Click"/>
+                Click="CancelBtn_Click" IsEnabled="False"/>
     </Grid>
 </Window>

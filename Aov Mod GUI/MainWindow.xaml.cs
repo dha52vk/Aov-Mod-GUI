@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -46,6 +47,8 @@ namespace Aov_Mod_GUI
         public MainWindow()
         {
             InitializeComponent();
+
+            SaveSettingsButton.Click += SaveSettingsButton_Click;
 
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(PageContainer); i++)
             {
@@ -122,6 +125,11 @@ namespace Aov_Mod_GUI
                     }
                 }
             }
+        }
+
+        private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -368,12 +376,12 @@ namespace Aov_Mod_GUI
             return Heroes?.SelectMany(h => h.Skins ?? []).Select((s) => s.Id).Contains(skinId) ?? false;
         }
 
-        public List<Skin>? GetSkinLevelA(int heroId)
+        public static List<Skin>? GetSkinLevelA(int heroId)
         {
             Hero? hero = Heroes?.ToList().Find((hero) => hero.Id == heroId);
             if (hero == null || levelWrapper == null)
                 return null;
-            List<Skin> skin = [new Skin(heroId * 10 + 1, "Default")];
+            List<Skin> skin = [new Skin() { Id = heroId * 10 + 1, Label= "Default", Name="" }];
             skin.AddRange(hero?.Skins?.Where((skin) => levelWrapper.GetSkinLevel(skin) <= (int)DefaultLevel.A) ?? []);
             return skin;
         }

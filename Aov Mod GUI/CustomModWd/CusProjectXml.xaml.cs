@@ -65,19 +65,25 @@ namespace Aov_Mod_GUI.CustomModWd
         TextChangedEventHandler? OtherCustomPathChanged;
         SelectionChangedEventHandler? OtherActionsComboboxChanged;
 
-        public CusProjectXml()
+        public CusProjectXml(string? pkgPath = null)
         {
             InitializeComponent();
-            OpenFileDialog openFileDialog = new() { CheckFileExists = true, Multiselect = true };
-            if (openFileDialog.ShowDialog() == true)
+            if (pkgPath == null || !File.Exists(pkgPath))
             {
-                SavePackagePath = openFileDialog.FileName;
-                projectPackage = new ProjectPackage(SavePackagePath);
-                Init();
+                OpenFileDialog openFileDialog = new() { CheckFileExists = true, Multiselect = true };
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    SavePackagePath = openFileDialog.FileName;
+                    Init();
+                }
+                else
+                {
+                    Close();
+                }
             }
             else
             {
-                Close();
+                SavePackagePath = pkgPath;
             }
         }
 
@@ -106,7 +112,6 @@ namespace Aov_Mod_GUI.CustomModWd
 
             OtherCustomPath.TextChanged = OtherCustomPathChanged;
             OtherActionsCombobox.SelectionChanged += OtherActionsComboboxChanged;
-            this.Title = projectPackage.PackageTitle;
 
             SearchPage.Visibility = Visibility.Collapsed;
             ShowOtherPage.Visibility = Visibility.Collapsed;
@@ -164,6 +169,10 @@ namespace Aov_Mod_GUI.CustomModWd
 
         public void ReloadSources()
         {
+            if (!string.IsNullOrEmpty(SavePackagePath))
+            {
+                projectPackage = new ProjectPackage(SavePackagePath);
+            }
             itemSources = [];
             foreach (var pair in projectPackage.Projects)
             {
@@ -171,6 +180,7 @@ namespace Aov_Mod_GUI.CustomModWd
             }
             Dispatcher.Invoke(() =>
             {
+                this.Title = projectPackage.PackageTitle;
                 ProjectTreeView.ItemsSource = itemSources;
 
                 if (modSources != null)
@@ -196,7 +206,7 @@ namespace Aov_Mod_GUI.CustomModWd
             }
             else
             {
-                ProgressWindow progressWd = new() { Owner=this};
+                ProgressWindow progressWd = new() { Owner = this };
                 progressWd.Execute(() => projectPackage.SaveTo(SavePackagePath));
                 progressWd.ShowDialog();
             }

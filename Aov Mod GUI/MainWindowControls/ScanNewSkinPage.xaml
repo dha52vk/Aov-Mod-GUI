@@ -1,0 +1,26 @@
+﻿<UserControl x:Class="Aov_Mod_GUI.MainWindowControls.ScanNewSkinPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Aov_Mod_GUI.MainWindowControls" xmlns:aov_mod_gui="clr-namespace:Aov_Mod_GUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel>
+        <Button x:Name="StartScanBtn" Content="Start Scan New Skins" Padding="10" 
+                FontFamily="{StaticResource Montserrat}" FontSize="18"/>
+        <Separator Margin="10 5"/>
+        <StackPanel x:Name="FieldContainer"/>
+        <Separator Margin="10 5"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="CommitLabelBtn" Content="Commit New Skins" Padding="10" 
+                    FontFamily="{StaticResource Montserrat}" FontSize="18" Margin="5"/>
+            <Button x:Name="SaveListBtn" Content="Save Hero List" Padding="10" Grid.Column="1"
+                    FontFamily="{StaticResource Montserrat}" FontSize="18" Margin="5"/>
+        </Grid>
+    </StackPanel>
+</UserControl>

@@ -124,10 +124,37 @@
                         </Grid>
                     </Grid>
 
+                    <Grid x:Name="ScanNewPage" Visibility="Collapsed">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
+                            <mainwindowcontrols:ScanNewSkinPage x:Name="ScanNewSkinPage"/>
+                        </ScrollViewer>
+                    </Grid>
+
                     <Grid x:Name="SettingsPage" Visibility="Visible">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <Button x:Name="EditSkinListBtn"/>
+                                <Label Content="Mod Sources: " Margin="5"
+                                       Foreground="White" FontFamily="{StaticResource Montserrat}" FontSize="18"/>
+                                <local:PathTextedit x:Name="ChannelNameField" PathLabel="Channel Name:"/>
+                                <local:PathTextedit x:Name="YoutubeLinkField" PathLabel="Youtube Link:"/>
+                                <local:PathTextedit x:Name="AovVersionField" PathLabel="Aov Version:"/>
+                                <local:PathTextedit x:Name="LanguageCodeField" PathLabel="Language Code:"/>
+                                <local:PathTextedit x:Name="ResourcesPathField" PathLabel="Resources Path: " IsFolderSelect="True"/>
+                                <Separator Margin="10 5"/>
+                                <Label Content="Skin Levels: " Margin="5"
+                                       Foreground="White" FontFamily="{StaticResource Montserrat}" FontSize="18"/>
+                                <StackPanel x:Name="LabelLevelFieldContainer"/>
+                                <Button x:Name="AddLabelLevelField" Content="Add Label Level"
+                                        FontSize="15" FontFamily="{StaticResource Montserrat}"
+                                        Margin="0 0 10 5" Padding="30 7" HorizontalAlignment="Right"/>
+                                <StackPanel x:Name="SkinLevelFieldContainer"/>
+                                <Button x:Name="AddSkinLevelField" Content="Add Skin Level"
+                                        FontSize="15" FontFamily="{StaticResource Montserrat}"
+                                        Margin="0 0 10 5" Padding="30 7" HorizontalAlignment="Right"/>
+                                <Button x:Name="SaveSettingsButton" Content="Save All Settings"
+                                        FontSize="15" FontFamily="{StaticResource Montserrat}"
+                                        Margin="10 0 10 5" Padding="30 7"/>
+                                <Separator Margin="10 5"/>
                             </StackPanel>
                         </ScrollViewer> 
                     </Grid>
@@ -189,6 +216,8 @@
                 <Rectangle Height="20" Visibility="Hidden"/>
                 <local:MenuRadioButton Checked="MenuBtn_Checked" Tag="HomePage" IsChecked="True"
                                        MenuIconSource="/images/ic_home.png" MenuLabel="Trang chủ"/>
+                <local:MenuRadioButton Checked="MenuBtn_Checked" Tag="ScanNewPage"
+                                       MenuIconSource="/images/ic_radar.png" MenuLabel="Quét skin mới"/>
                 <local:MenuRadioButton Checked="MenuBtn_Checked" Tag="SettingsPage"
                                        MenuIconSource="/images/ic_settings.png" MenuLabel="Cài đặt"/>
                 <local:MenuRadioButton Checked="MenuBtn_Checked" Tag="ImportPage"
