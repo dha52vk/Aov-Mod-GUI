@@ -551,8 +551,8 @@ namespace Aov_Mod_GUI.MainWindowControls
                 LabelCombobox.ItemsSource = sources;
             }
             CustomModControl.Visibility = Visibility.Visible;
-            OldSkins = [new(){Id=int.Parse(CustomHeroId.Text), Label = "Default", Name=""}];
-            OldSkins = heroes?.Find((hero) => hero.Id == int.Parse(CustomHeroId.GetText()))?.Skins ?? [];
+            OldSkins = [new(){Id=int.Parse(CustomHeroId.Text+"1"), Label = "Default", Name=""}];
+            OldSkins.AddRange(heroes?.Find((hero) => hero.Id == int.Parse(CustomHeroId.GetText()))?.Skins ?? []);
             string InfosPath = infoPath,
                 AssetRefPath = assetrefPath,
                 HeroActionsPath = heroActionsPath;
@@ -562,13 +562,13 @@ namespace Aov_Mod_GUI.MainWindowControls
             progressWd.Execute(() =>
             {
                 progressWd.UpdateProgress(0, "Loading icon...");
-                iconWp = new(GetAovBytesFrom(iconPath));
+                if (File.Exists(iconPath)) iconWp = new(GetAovBytesFrom(iconPath));
                 progressWd.UpdateProgress(1, "Loading label...");
-                labelWp = new(GetAovBytesFrom(labelPath));
+                if (File.Exists(labelPath)) labelWp = new(GetAovBytesFrom(labelPath));
                 progressWd.UpdateProgress(2, "Loading infos...");
                 infoElement = new(InfosPath);
                 progressWd.UpdateProgress(3, "Loading assetref...");
-                assetRefElement = PackageSerializer.Deserialize(GetAovBytesFrom(AssetRefPath));
+                if (File.Exists(AssetRefPath)) assetRefElement = PackageSerializer.Deserialize(GetAovBytesFrom(AssetRefPath));
                 progressWd.UpdateProgress(4, "Loading hero actions...");
                 heroActionsPkg = new(HeroActionsPath);
                 progressWd.UpdateProgress(5, "Loading common actions...");
@@ -578,7 +578,7 @@ namespace Aov_Mod_GUI.MainWindowControls
                 {
                     string soundT = Path.GetFileName(soundPath[i]);
                     progressWd.UpdateProgress(6 + i, $"Loading {soundT}...");
-                    soundWps.Add(soundT, new(GetAovBytesFrom(soundPath[i])));
+                    if (File.Exists(soundPath[i])) soundWps.Add(soundT, new(GetAovBytesFrom(soundPath[i])));
                 }
             });
             progressWd.ShowDialog();
@@ -785,7 +785,7 @@ namespace Aov_Mod_GUI.MainWindowControls
                 if (checkIcon) CustomIcon(iconId, swapIcon);
                 if (checkLabel) CustomLabel(label);
                 progressWd.UpdateProgress(0, "Saving icon...");
-                if (iconWp != null) File.WriteAllBytes(iconPath, AovTranslation.Compress(iconWp.getBytes()));
+                if (iconWp != null) File.WriteAllBytes(iconPath, AovTranslation.Compress(iconWp.GetBytes()));
                 progressWd.UpdateProgress(1, "Saving label...");
                 if (labelWp != null) File.WriteAllBytes(labelPath, AovTranslation.Compress(labelWp.GetBytes()));
                 progressWd.UpdateProgress(2, "Saving infos...");
@@ -812,10 +812,7 @@ namespace Aov_Mod_GUI.MainWindowControls
                 }
             });
             progressWd.ShowDialog();
-            ResetCustomFields();
-            CustomHeroId.SetReadOnly(false);
-            CustomSkinName.SetReadOnly(false);
-            FolderSavePath.SetReadOnly(false);
+            //ResetCustomFields();
         }
 
         private void CustomCancelBtn_Click(object sender, RoutedEventArgs e)

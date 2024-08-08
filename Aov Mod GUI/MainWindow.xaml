@@ -72,8 +72,10 @@
                     <Grid x:Name="HomePage" Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
-                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="100"/>
                         </Grid.RowDefinitions>
+                        <Rectangle Fill="Transparent" x:Name="GridRectPopup"
+                                   Margin="50 30"/>
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" Grid.Row="0">
                             <ItemsControl x:Name="ListItem" MouseLeftButtonDown="ListItem_MouseLeftButtonDown">
                                 <ItemsControl.ItemsPanel>
@@ -99,38 +101,91 @@
                         <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
-                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="100"/>
                             </Grid.ColumnDefinitions>
-                            <Button Name="StartBtn" Content="Start" Margin="15 0" Click="StartBtn_Click" Grid.Column="1"
-                                    VerticalAlignment="Center" HorizontalAlignment="Right" Padding="30 5"/>
-                            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
-                                <ListView x:Name="ListViewSkinSelected" Background="Transparent"
-                                          MouseDoubleClick="ListViewSkinSelected_MouseDoubleClick">
-                                    <ListView.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal"></StackPanel>
-                                        </ItemsPanelTemplate>
-                                    </ListView.ItemsPanel>
-                                    <ListView.ItemTemplate>
-                                        <HierarchicalDataTemplate>
-                                            <Grid>
-                                                <Image Height="40"  Source="{Binding IconMiniURL}"
-                                                       />
+                            <StackPanel Grid.Column="1">
+                                <Button Name="ConfigSkinPackBtn" Content="Config Packs" Margin="15 5 15 0"
+                                    VerticalAlignment="Center" HorizontalAlignment="Center" Width="100" Height="27"/>
+                                <Button Name="AddSkinsBtn" Content="Add Pack" Margin="15 5 15 0"
+                                    VerticalAlignment="Center" HorizontalAlignment="Center" Width="100" Height="27"/>
+                                <Button Name="StartBtn" Content="Start" Margin="15 5 15 0" Click="StartBtn_Click"
+                                    VerticalAlignment="Center" HorizontalAlignment="Center" Width="100" Height="27"/>
+                            </StackPanel>
+                            <ListView x:Name="ListViewSkinSelected" Background="Transparent" 
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      MouseDoubleClick="ListViewSkinSelected_MouseDoubleClick">
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"></WrapPanel>
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                                <ListView.ItemTemplate>
+                                    <HierarchicalDataTemplate>
+                                        <StackPanel Width="55" ToolTip="{Binding Name}" Height="85">
+                                            <Image Width="55" Height="55" Source="{Binding IconMiniURL}" VerticalAlignment="Top"/>
+                                            <Grid Height="35">
+                                                <TextBlock Text="{Binding Name}" Foreground="White" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                                                           FontFamily="{StaticResource Montserrat}" TextAlignment="Center" FontSize="10"
+                                                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                             </Grid>
-                                        </HierarchicalDataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
-                            </ScrollViewer>
+                                        </StackPanel>
+                                    </HierarchicalDataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Grid>
+                        <Grid x:Name="SelectSkinPackGrid">
+                            <Border Background="#CC000000" x:Name="SelectSkinPackBackground"/>
+                            <Border VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20 10"
+                                    Background="#1E1E1E" BorderBrush="White" BorderThickness="1">
+                                <StackPanel>
+                                    <Grid Margin="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="2*" MinWidth="200"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Select Pack: " FontFamily="{StaticResource Montserrat ExtraBold Italic}"
+                                               Foreground="White" FontSize="18"/>
+                                        <ComboBox x:Name="SkinPacksCbb" Grid.Column="1"
+                                                  FontFamily="{StaticResource Montserrat}" FontSize="15">
+                                            <ComboBox.Resources>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="Black" />
+                                                </Style>
+                                            </ComboBox.Resources>
+                                        </ComboBox>
+                                    </Grid>
+                                    <Button Content="Show" Padding="30 5" HorizontalAlignment="Right" Margin="20 5"
+                                            x:Name="CommitSkinPackButton"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        <Grid x:Name="ConfigSkinPacksGrid">
+                            <Border Background="#CC000000" x:Name="ConfigSkinPacksBackground"/>
+                            <Border VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20 10"
+                                    Background="#1E1E1E" BorderBrush="White" BorderThickness="1"
+                                    MaxWidth="{Binding ElementName=GridRectPopup, Path=Width}"
+                                    MaxHeight="{Binding ElementName=GridRectPopup, Path=Height}">
+                                <StackPanel>
+                                    <StackPanel x:Name="SkinPackContainer"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Name="AddPackBtn" Content="Add This Pack" Margin="15 5 15 0"
+                                                Width="100" Height="27"/>
+                                        <Button Name="SavePackBtn" Content="Save Pack Skin List" Margin="15 5 15 0"
+                                                Width="100" Height="27"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </Grid>
 
-                    <Grid x:Name="ScanNewPage" Visibility="Collapsed">
+                    <Grid x:Name="ScanNewPage" Visibility="Visible">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
                             <mainwindowcontrols:ScanNewSkinPage x:Name="ScanNewSkinPage"/>
                         </ScrollViewer>
                     </Grid>
 
-                    <Grid x:Name="SettingsPage" Visibility="Visible">
+                    <Grid x:Name="SettingsPage" Visibility="Collapsed">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
                                 <Label Content="Mod Sources: " Margin="5"
@@ -156,9 +211,9 @@
                                         Margin="10 0 10 5" Padding="30 7"/>
                                 <Separator Margin="10 5"/>
                             </StackPanel>
-                        </ScrollViewer> 
+                        </ScrollViewer>
                     </Grid>
-                    
+
                     <Grid x:Name="ImportPage" Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition/>

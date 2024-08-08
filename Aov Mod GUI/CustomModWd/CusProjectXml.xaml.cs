@@ -31,11 +31,11 @@ namespace Aov_Mod_GUI.CustomModWd
     public partial class CusProjectXml : Window
     {
         ModSources? modSources { get => MainWindow.GetModSources(); }
-        ProjectPackage projectPackage;
+        ProjectPackage? projectPackage;
         public static List<ProjectItem>? ItemsCopied { get; set; }
         ObservableCollection<ProjectItem> itemSources = [];
         bool _IsReadOnly = false;
-        string? SavePackagePath = null;
+        readonly string? SavePackagePath = null;
         public bool IsReadOnly
         {
             get => _IsReadOnly;
@@ -159,7 +159,7 @@ namespace Aov_Mod_GUI.CustomModWd
 
         private void CusProjectXml_ContentRendered(object? sender, EventArgs e)
         {
-            ProgressWindow progressWd = new ProgressWindow() { Owner = this, IsIndeterminate = true };
+            ProgressWindow progressWd = new() { Owner = this, IsIndeterminate = true };
             progressWd.Execute(() =>
             {
                 ReloadSources();
@@ -172,6 +172,10 @@ namespace Aov_Mod_GUI.CustomModWd
             if (!string.IsNullOrEmpty(SavePackagePath))
             {
                 projectPackage = new ProjectPackage(SavePackagePath);
+            }
+            if (projectPackage == null)
+            {
+                return;
             }
             itemSources = [];
             foreach (var pair in projectPackage.Projects)
@@ -207,7 +211,7 @@ namespace Aov_Mod_GUI.CustomModWd
             else
             {
                 ProgressWindow progressWd = new() { Owner = this };
-                progressWd.Execute(() => projectPackage.SaveTo(SavePackagePath));
+                progressWd.Execute(() => projectPackage?.SaveTo(SavePackagePath));
                 progressWd.ShowDialog();
             }
         }
@@ -268,7 +272,7 @@ namespace Aov_Mod_GUI.CustomModWd
         private void CopyItem(object sender, RoutedEventArgs e)
         {
             List<ProjectItem>? selectedItems = ProjectTreeView.SelectedItems.Cast<ProjectItem>().ToList();
-            if (ProjectTreeView.SelectedItem == null || !(ProjectTreeView.SelectedItem is ProjectItem item))
+            if (ProjectTreeView.SelectedItem == null || ProjectTreeView.SelectedItem is not ProjectItem)
                 return;
             ItemsCopied = selectedItems;
         }
@@ -285,9 +289,8 @@ namespace Aov_Mod_GUI.CustomModWd
         {
             if (IsReadOnly)
                 return;
-            ProjectItem? selectedItem = ProjectTreeView.SelectedItem as ProjectItem;
             List<ProjectItem>? selectedItems = ProjectTreeView.SelectedItems.Cast<ProjectItem>().ToList();
-            if (selectedItem == null || ItemsCopied == null || selectedItems.Count > 1)
+            if (ProjectTreeView.SelectedItem is not ProjectItem selectedItem || ItemsCopied == null || selectedItems.Count > 1)
                 return;
             foreach (var item in ItemsCopied)
             {
@@ -303,9 +306,8 @@ namespace Aov_Mod_GUI.CustomModWd
         {
             if (IsReadOnly)
                 return;
-            ProjectItem? selectedItem = ProjectTreeView.SelectedItem as ProjectItem;
             List<ProjectItem>? selectedItems = ProjectTreeView.SelectedItems.Cast<ProjectItem>().ToList();
-            if (selectedItem == null || ItemsCopied == null || selectedItem.Parent == null || selectedItems.Count > 1)
+            if (ProjectTreeView.SelectedItem is not ProjectItem selectedItem || ItemsCopied == null || selectedItem.Parent == null || selectedItems.Count > 1)
                 return;
             foreach (var item in ItemsCopied)
             {
@@ -355,8 +357,7 @@ namespace Aov_Mod_GUI.CustomModWd
         private void EditBtn_Click(object sender, RoutedEventArgs e)
         {
             List<ProjectItem>? selectedItems = ProjectTreeView.SelectedItems.Cast<ProjectItem>().ToList();
-            ProjectItem? selectedItem = ProjectTreeView.SelectedItem as ProjectItem;
-            if (selectedItem == null || selectedItems.Count > 1 || selectedItem.node == null || selectedItem.IsRoot)
+            if (ProjectTreeView.SelectedItem is not ProjectItem selectedItem || selectedItems.Count > 1 || selectedItem.node == null || selectedItem.IsRoot)
                 return;
 
             EditXmlNodeWindow xmlNodeWindow = new(selectedItem.node) { Owner = this };
@@ -410,7 +411,7 @@ namespace Aov_Mod_GUI.CustomModWd
             SearchPage.Visibility = Visibility.Collapsed;
         }
 
-        public bool ApplyFilter(ProjectItem item, Func<ProjectItem, bool> filter)
+        public static bool ApplyFilter(ProjectItem item, Func<ProjectItem, bool> filter)
         {
             bool match = filter(item);
             foreach (var child in item.Children)
@@ -431,9 +432,11 @@ namespace Aov_Mod_GUI.CustomModWd
             string? value2 = OtherCustomPath.Text;
             if (modSources == null || (value == null && string.IsNullOrEmpty(value2)))
                 return;
-            ProjectPackage pkg = new ProjectPackage(value != null ? Path.Combine(modSources.ActionsParentPath, value) : value2);
-            CusProjectXml CusActions = new(pkg);
-            CusActions.IsReadOnly = true;
+            ProjectPackage pkg = new(value != null ? Path.Combine(modSources.ActionsParentPath, value) : value2);
+            CusProjectXml CusActions = new(pkg)
+            {
+                IsReadOnly = true
+            };
             CusActions.Show();
         }
     }

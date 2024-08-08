@@ -6,6 +6,13 @@
              xmlns:local="clr-namespace:Aov_Mod_GUI.MainWindowControls" xmlns:aov_mod_gui="clr-namespace:Aov_Mod_GUI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontFamily" Value="{StaticResource Montserrat}" />
+        </Style>
+    </UserControl.Resources>
     <StackPanel>
         <Button x:Name="StartScanBtn" Content="Start Scan New Skins" Padding="10" 
                 FontFamily="{StaticResource Montserrat}" FontSize="18"/>
@@ -22,5 +29,12 @@
             <Button x:Name="SaveListBtn" Content="Save Hero List" Padding="10" Grid.Column="1"
                     FontFamily="{StaticResource Montserrat}" FontSize="18" Margin="5"/>
         </Grid>
+        <Separator Margin="10 5"/>
+        <Label Content="Commited Skins: " Foreground="White" Margin="10 0 0 0"
+               FontFamily="{StaticResource Montserrat}" FontSize="17"/>
+        <StackPanel x:Name="CommitedSkinContainer" Margin="25 0 0 0 "/>
+        <Separator Margin="10 5"/>
+        <Button x:Name="AddCommitedSkinBtn" Content="Add Commited skins to selected skins"
+                Padding="10" Grid.Column="1" FontFamily="{StaticResource Montserrat}" FontSize="15" Margin="5"/>
     </StackPanel>
 </UserControl>

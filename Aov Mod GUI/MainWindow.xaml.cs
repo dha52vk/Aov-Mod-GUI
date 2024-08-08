@@ -1,4 +1,5 @@
 ﻿using Aov_Mod_GUI.CustomModWd;
+using Aov_Mod_GUI.MainWindowControls;
 using Aov_Mod_GUI.Models;
 using Aov_Mod_GUI.Models.DataSave;
 using AovClass;
@@ -12,6 +13,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Media;
+using System.Reflection.Metadata;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -29,12 +32,13 @@ namespace Aov_Mod_GUI
         public bool IsMenuOpen = false;
 
         private static ObservableCollection<Hero>? Heroes;
+        private static ObservableCollection<SkinPack> SkinPacks = [];
         private static ModSources? modSources;
         private static SkinLevelWrapper? levelWrapper;
         private static ModController? modController;
-        public ObservableCollection<Skin>? SkinsSelected = [];
+        private static readonly ObservableCollection<Skin> SkinsSelected = [];
 
-        public int MaxGridColumn=150;
+        public int MaxGridColumn = 150;
 
         public UniformGrid? ListItemUniformGrid;
         public UniformGrid? ListSkinSelectedUniformGrid;
@@ -49,6 +53,17 @@ namespace Aov_Mod_GUI
             InitializeComponent();
 
             SaveSettingsButton.Click += SaveSettingsButton_Click;
+            AddPackBtn.Click += AddPackBtn_Click;
+            AddSkinsBtn.Click += AddSkinsBtn_Click;
+            SavePackBtn.Click += SavePackListBtn_Click;
+            CommitSkinPackButton.Click += CommitSkinPackButton_Click;
+            ConfigSkinPackBtn.Click += ConfigSkinPackBtn_Click;
+
+            SelectSkinPackBackground.MouseDown += SelectPackBackground_MouseDown;
+            ConfigSkinPacksBackground.MouseDown += ConfigSkinPacksBackground_MouseDown;
+
+            SelectSkinPackGrid.Visibility = Visibility.Collapsed;
+            ConfigSkinPacksGrid.Visibility = Visibility.Collapsed;
 
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(PageContainer); i++)
             {
@@ -74,6 +89,10 @@ namespace Aov_Mod_GUI
                 CheckPathExists = true
             };
             Directory.CreateDirectory("data");
+            if (!File.Exists(DataPaths.SkinPackList))
+            {
+                File.WriteAllText(DataPaths.SkinPackList, JsonConvert.SerializeObject(new SkinPackList([.. SkinPacks])));
+            }
             if (!File.Exists(DataPaths.HeroList))
             {
                 JsonMissing:
@@ -127,9 +146,81 @@ namespace Aov_Mod_GUI
             }
         }
 
+        private void SavePackListBtn_Click(object sender, RoutedEventArgs e)
+        {
+            List<string> packNames = [];
+            foreach (SkinPackField field in SkinPackContainer.Children)
+            {
+                if (field.Tag is string s)
+                    packNames.Add(s);
+            }
+            var packs = SkinPacks.Where(pack => packNames.Contains(pack.PackName));
+            SkinPacks.Clear();
+            foreach (var pack in packs)
+            {
+                SkinPacks.Add(pack);
+            }
+            File.WriteAllText(DataPaths.SkinPackList, JsonConvert.SerializeObject(new SkinPackList([.. SkinPacks])));
+            SkinPacksCbb.ItemsSource = SkinPacks;
+            ConfigSkinPacksGrid.Visibility = Visibility.Collapsed;
+        }
+
+        private void ConfigSkinPacksBackground_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            ConfigSkinPacksGrid.Visibility = Visibility.Collapsed;
+        }
+
+        private void ConfigSkinPackBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigSkinPacksGrid.Visibility = Visibility.Visible;
+        }
+
+        private void CommitSkinPackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SkinPacksCbb.SelectedItem is SkinPack pack)
+            {
+                List<Skin>? skins = Heroes?.SelectMany(h => h.Skins ?? []).ToList();
+                if (skins != null)
+                {
+                    var skinIdAdds = pack.SkinIds.Where(id => SkinsSelected.Where(s => s.Id == id).Count() == 0);
+                    foreach (var skinId in skinIdAdds)
+                    {
+                        var skin = skins.Find(s => s.Id == skinId);
+                        if (skin != null)
+                        {
+                            SkinsSelected.Add(skin);
+                        }
+                    }
+                }
+            }
+            SelectSkinPackGrid.Visibility = Visibility.Collapsed;
+        }
+
+        private void SelectPackBackground_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            SelectSkinPackGrid.Visibility = Visibility.Collapsed;
+        }
+
+        private void AddSkinsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            SelectSkinPackGrid.Visibility = Visibility.Visible;
+        }
+
+        private void AddPackBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (SkinsSelected.Count < 2)
+                return;
+            SkinPacks.Clear();
+            InputFieldWindow inputWd = new() { Owner = this, Label = "Nhập tên pack:" };
+            if (inputWd.ShowDialog() == true)
+            {
+                SkinPacks.Add(new(inputWd.InputResult, SkinsSelected.Select(s => s.Id).ToList()));
+                File.WriteAllText(DataPaths.SkinPackList, JsonConvert.SerializeObject(new SkinPackList([.. SkinPacks])));
+            }
+        }
+
         private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -146,7 +237,7 @@ namespace Aov_Mod_GUI
         private void MainWd_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             int width = (int)Math.Round(e.NewSize.Width);
-            int col = (int) Math.Ceiling((double)width / MaxGridColumn);
+            int col = (int)Math.Ceiling((double)width / MaxGridColumn);
             if (ListItemUniformGrid != null)
             {
                 ListItemUniformGrid.Columns = col;
@@ -216,7 +307,7 @@ namespace Aov_Mod_GUI
                         if (chooseSkinWindow.ShowDialog() == true && chooseSkinWindow.Result != null)
                         {
                             //MessageBox.Show("Ban da chon skin " + chooseSkinWindow.Result.name);
-                            SkinsSelected?.Add(chooseSkinWindow.Result);
+                            AddSkinSelected(chooseSkinWindow.Result);
                         }
                         else
                         {
@@ -287,15 +378,16 @@ namespace Aov_Mod_GUI
             foreach (Skin skin in SkinsSelected)
             {
                 content += $"  + {skin.Name}\n";
-                var oldSkins = GetSkinLevelA(int.Parse(skin.Id.ToString()?[..3] ?? "-1"));
+                var oldSkins = GetSkinLevelA(int.Parse(skin.Id.ToString()?[..3] ?? "-1"))?.Where(s => s.Id != skin.Id);
                 if (oldSkins != null)
-                    modList.Add(new(oldSkins, skin, ModSettings.AllEnable));
+                    modList.Add(new(oldSkins.ToList(), skin, ModSettings.AllEnable));
             }
             ProgressWindow progressWindow = new() { Owner = this, IsIndeterminate = true };
             progressWindow.SetCancelable(false);
             progressWindow.Execute(() =>
             {
-                if (modController != null){
+                if (modController != null)
+                {
                     modController.UpdateProgress = (status) => progressWindow.UpdateProgress(0, status);
                     string packname = "PackMod_" + DateTime.Now.ToString("MM.dd.yyyy HH:mm:ss");
                     modController.ModSkin(modList, packname);
@@ -335,6 +427,23 @@ namespace Aov_Mod_GUI
             HeroList? heroList = JsonConvert.DeserializeObject<HeroList>(File.ReadAllText(DataPaths.HeroList));
             levelWrapper = JsonConvert.DeserializeObject<SkinLevelWrapper>(File.ReadAllText(DataPaths.SkinLevels));
             modSources = JsonConvert.DeserializeObject<ModSources>(File.ReadAllText(DataPaths.ModSources));
+            SkinPacks = [.. JsonConvert.DeserializeObject<SkinPackList>(File.ReadAllText(DataPaths.SkinPackList))?.SkinPacks];
+            foreach (SkinPack skinPack in SkinPacks)
+            {
+                SkinPackField field = new()
+                {
+                    FieldLabel = skinPack.PackName,
+                    SkinList = skinPack.SkinIds,
+                    Tag = skinPack.PackName,
+                    FontSize = 18,
+                    TextColor = Brushes.White
+                };
+                field.RemoveButtonClick = (sender, e) =>
+                {
+                    SkinPackContainer.Children.Remove(field);
+                };
+                SkinPackContainer.Children.Add(field);
+            }
             if (heroList != null && heroList.Heros != null)
             {
                 heroList.Heros.Sort((a, b) => string.Compare(a.Name, b.Name));
@@ -343,6 +452,10 @@ namespace Aov_Mod_GUI
                 {
                     modController = new(modSources, levelWrapper) { heroList = Heroes.ToList() };
                 }
+            }
+            if (SkinPacks != null)
+            {
+                SkinPacksCbb.ItemsSource = SkinPacks;
             }
         }
 
@@ -381,9 +494,17 @@ namespace Aov_Mod_GUI
             Hero? hero = Heroes?.ToList().Find((hero) => hero.Id == heroId);
             if (hero == null || levelWrapper == null)
                 return null;
-            List<Skin> skin = [new Skin() { Id = heroId * 10 + 1, Label= "Default", Name="" }];
+            List<Skin> skin = [new Skin() { Id = heroId * 10 + 1, Label = "Default", Name = "" }];
             skin.AddRange(hero?.Skins?.Where((skin) => levelWrapper.GetSkinLevel(skin) <= (int)DefaultLevel.A) ?? []);
             return skin;
+        }
+
+        public static void AddSkinSelected(Skin skin)
+        {
+            Skin? skinHad = SkinsSelected.Where(s => s.Id.ToString()[..3] == skin.Id.ToString()[..3]).FirstOrDefault();
+            if (skinHad != null)
+                SkinsSelected.Remove(skinHad);
+            SkinsSelected.Add(skin);
         }
 
         static bool CheckJson<T>(string json)

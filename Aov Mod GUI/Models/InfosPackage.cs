@@ -1,6 +1,7 @@
 ﻿using AovClass;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace Aov_Mod_GUI.Models
                 byte[] bytes = File.ReadAllBytes(filePath);
                 try
                 {
-                    Elements[Path.GetFileName(filePath)] = 
+                    Elements[Path.Combine(subPath, Path.GetFileName(filePath))] = 
                         PackageSerializer.Deserialize(AovTranslation.Decompress(bytes) ?? bytes);
                 }
                 catch
@@ -54,7 +55,7 @@ namespace Aov_Mod_GUI.Models
             }
             foreach (string folderPath in Directory.GetDirectories(Path.Combine(tempDir.FullName, subPath)))
             {
-                ScanPackage(folderPath);
+                ScanPackage(Path.Combine(subPath, Path.GetFileName(folderPath)));
             }
         }
 
@@ -76,11 +77,10 @@ namespace Aov_Mod_GUI.Models
             {
                 return;
             }
-            foreach (string filePath in Directory.GetFiles(Path.Combine(tempDir.FullName, subPath)))
+            foreach (var pair in Elements)
             {
-                byte[] bytes = File.ReadAllBytes(filePath);
-                File.WriteAllBytes(filePath, 
-                    AovTranslation.Compress(PackageSerializer.Serialize(Elements[Path.GetFileName(filePath)])) );
+                File.WriteAllBytes(Path.Combine(tempDir.FullName, pair.Key), 
+                    AovTranslation.Compress(PackageSerializer.Serialize(pair.Value)) );
             }
             foreach (string folderPath in Directory.GetDirectories(Path.Combine(tempDir.FullName, subPath)))
             {

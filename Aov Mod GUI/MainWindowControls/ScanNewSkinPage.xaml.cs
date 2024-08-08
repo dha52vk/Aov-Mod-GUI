@@ -29,21 +29,31 @@ namespace Aov_Mod_GUI.MainWindowControls
         List<Hero>? heroList { get => MainWindow.GetHeroList(); }
         ModSources? modSources { get => MainWindow.GetModSources(); }
         SkinLevelWrapper? lvWrapper { get => MainWindow.GetSkinLevelWp(); }
-        bool scanned = false;
 
         public ScanNewSkinPage()
         {
             InitializeComponent();
+
             StartScanBtn.Click += StartScanBtn_Click;
             CommitLabelBtn.Click += CommitLabelBtn_Click;
             SaveListBtn.Click += SaveListBtn_Click;
+            AddCommitedSkinBtn.Click += AddCommitedSkinBtn_Click;
+        }
+
+        private void AddCommitedSkinBtn_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (PathTextedit field in FieldContainer.Children)
+            {
+                if (field.Tag is Skin skin)
+                    MainWindow.AddSkinSelected(skin);
+            }
         }
 
         private void SaveListBtn_Click(object sender, RoutedEventArgs e)
         {
             HeroList list = new() { Heros = heroList };
             File.WriteAllText(DataPaths.HeroList, JsonConvert.SerializeObject(list));
-            scanned = false;
+            MessageBox.Show("Saved");
         }
 
         private void CommitLabelBtn_Click(object sender, RoutedEventArgs e)
@@ -56,15 +66,18 @@ namespace Aov_Mod_GUI.MainWindowControls
             {
                 if (string.IsNullOrEmpty(field.Text))
                     continue;
-                if (lvWrapper.SkinLabelLevels.FindIndex(l => l.label == field.Text) == -1)
+                SkinLabel? checkLabel = lvWrapper.SkinLabelLevels.Find(l => l.label.Equals(field.Text, StringComparison.CurrentCultureIgnoreCase));
+                if (checkLabel == null)
                 {
                     MessageBoxResult result = MessageBox.Show("Label " + field.Text + " not found! Bạn có muốn thêm label vào dữ liệu không?"
                         , "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
                     if (result == MessageBoxResult.Yes)
                     {
-                        InputFieldWindow inputWd = new() {
-                            Label = $"Nhập label level cho label '{field.Text}'", 
-                            IsNumberField = true, Owner=Window.GetWindow(this)
+                        InputFieldWindow inputWd = new()
+                        {
+                            Label = $"Nhập label level cho label '{field.Text}'",
+                            IsNumberField = true,
+                            Owner = Window.GetWindow(this)
                         };
                         if (inputWd.ShowDialog() == true)
                         {
@@ -80,7 +93,23 @@ namespace Aov_Mod_GUI.MainWindowControls
                         continue;
                     }
                 }
-                KeyValuePair<int, string> pair = (KeyValuePair<int, string>)field.Tag;
+                else
+                {
+                    field.Text = checkLabel.label;
+                }
+                if (field.Tag is not KeyValuePair<int, string> pair)
+                {
+                    if (field.Tag is Skin s)
+                    {
+                        s.Label = field.Text;
+                        TextBlock? txt = CommitedSkinContainer.Children.Cast<TextBlock>().Where(t => s.Id == (int)t.Tag).FirstOrDefault();
+                        if (txt != null)
+                        {
+                            txt.Text = $"- {s.Name}({s.Id}) - {s.Label}";
+                        }
+                    }
+                    continue;
+                }
                 Skin skin = new()
                 {
                     Id = pair.Key,
@@ -88,13 +117,20 @@ namespace Aov_Mod_GUI.MainWindowControls
                     Label = field.Text
                 };
                 heroList.Find(h => h.Id == int.Parse(skin.Id.ToString()[..3]))?.Skins?.Add(skin);
+                TextBlock textBlock = new()
+                {
+                    Text = $"- {skin.Name}({skin.Id}) - {skin.Label}",
+                    Tag = skin.Id
+                };
+                CommitedSkinContainer.Children.Add(textBlock);
                 LogExtension.Log($"Added {skin.Name}({skin.Id}) - {skin.Label}");
+                field.Tag = skin;
             }
         }
 
         private void StartScanBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (heroList == null || modSources == null || scanned)
+            if (heroList == null || modSources == null)
             {
                 return;
             }
@@ -119,6 +155,8 @@ namespace Aov_Mod_GUI.MainWindowControls
                 foreach (string line in lines)
                 {
                     string[] split = line.Split(" = ");
+                    if (split.Length < 2 || split[1].Contains("[ex]"))
+                        continue;
                     languageMap[split[0].Trim()] = split[1].Trim();
                 }
 
@@ -126,9 +164,11 @@ namespace Aov_Mod_GUI.MainWindowControls
                 foreach (string info in infoFiles)
                 {
                     InfosPackage infoPackage = new(info);
+                    string? heroCode = Path.GetFileName(Path.GetDirectoryName(infoPackage.Elements.Keys.ElementAt(0)));
+                    if (heroCode == null) continue;
                     foreach (var pair in infoPackage.Elements)
                     {
-                        if (Path.GetFileName(pair.Key).Split("_").Length == 3)
+                        if (pair.Key.EndsWith($"{heroCode}_actorinfo.bytes", StringComparison.CurrentCultureIgnoreCase))
                         {
                             PackageElement element = pair.Value;
                             PackageElement? SkinPrefabs = element.Children?.Find((c) => c._Name.Equals("SkinPrefab", StringComparison.CurrentCultureIgnoreCase));
@@ -163,17 +203,18 @@ namespace Aov_Mod_GUI.MainWindowControls
                     FieldContainer.Children.Clear();
                     foreach (var pair in skinPair)
                     {
-                        PathTextedit text = new();
-                        text.PathLabel = pair.Key + " - " + pair.Value + ": ";
-                        text.Tag = pair;
-                        text.ToolTip = heroList.Find(h => h.Id == int.Parse(pair.Key.ToString()[..3]))?.Name + pair.Value;
+                        PathTextedit text = new()
+                        {
+                            PathLabel = pair.Key + " - " + pair.Value + ": ",
+                            Tag = pair,
+                            ToolTip = heroList.Find(h => h.Id == int.Parse(pair.Key.ToString()[..3]))?.Name + pair.Value
+                        };
                         FieldContainer.Children.Add(text);
 
                     }
                 });
             });
             progressWd.ShowDialog();
-            scanned = true;
         }
     }
 }
