@@ -21,8 +21,10 @@
 
         <Label Content="{Binding FilterLabel, Mode=TwoWay}" Foreground="White" FontSize="18"/>
 
-        <TextBox Grid.Column="1" Text="{Binding AttributeName, Mode=TwoWay}" Margin="5"/>
-        <TextBox Grid.Column="2" Text="{Binding Value, Mode=TwoWay}" Margin="5"/>
+        <TextBox Grid.Column="1" Text="{Binding AttributeName, Mode=TwoWay}" Margin="5"
+                 PreviewTextInput="TextBox_PreviewTextInput_1"/>
+        <TextBox Grid.Column="2" Text="{Binding Value, Mode=TwoWay}" Margin="5"
+                 PreviewTextInput="TextBox_PreviewTextInput"/>
 
         <Button Grid.Column="3" Background="Transparent" Click="Button_Click">
             <Image Source="/images/ic_subtract.png"/>

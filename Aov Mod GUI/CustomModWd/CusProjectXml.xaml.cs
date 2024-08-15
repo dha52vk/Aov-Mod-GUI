@@ -74,7 +74,6 @@ namespace Aov_Mod_GUI.CustomModWd
                 if (openFileDialog.ShowDialog() == true)
                 {
                     SavePackagePath = openFileDialog.FileName;
-                    Init();
                 }
                 else
                 {
@@ -85,6 +84,7 @@ namespace Aov_Mod_GUI.CustomModWd
             {
                 SavePackagePath = pkgPath;
             }
+            Init();
         }
 
         public CusProjectXml(ProjectPackage package)
@@ -171,7 +171,15 @@ namespace Aov_Mod_GUI.CustomModWd
         {
             if (!string.IsNullOrEmpty(SavePackagePath))
             {
-                projectPackage = new ProjectPackage(SavePackagePath);
+                try
+                {
+                    projectPackage = new ProjectPackage(SavePackagePath);
+                }
+                catch
+                {
+                    MessageBox.Show("File không phải là aov infos file!!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }
             }
             if (projectPackage == null)
             {
@@ -214,6 +222,7 @@ namespace Aov_Mod_GUI.CustomModWd
                 progressWd.Execute(() => projectPackage?.SaveTo(SavePackagePath));
                 progressWd.ShowDialog();
             }
+            MessageBox.Show("Saved");
         }
 
         private void TreeView_KeyDown(object sender, KeyEventArgs e)
@@ -274,7 +283,9 @@ namespace Aov_Mod_GUI.CustomModWd
             List<ProjectItem>? selectedItems = ProjectTreeView.SelectedItems.Cast<ProjectItem>().ToList();
             if (ProjectTreeView.SelectedItem == null || ProjectTreeView.SelectedItem is not ProjectItem)
                 return;
-            ItemsCopied = selectedItems;
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
+            ItemsCopied = selectedItems.Select(item => item.Clone()).Where(item => item != null).ToList();
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
         }
 
         private void CopyAllChildItem(object sender, RoutedEventArgs e)
@@ -432,8 +443,8 @@ namespace Aov_Mod_GUI.CustomModWd
             string? value2 = OtherCustomPath.Text;
             if (modSources == null || (value == null && string.IsNullOrEmpty(value2)))
                 return;
-            ProjectPackage pkg = new(value != null ? Path.Combine(modSources.ActionsParentPath, value) : value2);
-            CusProjectXml CusActions = new(pkg)
+            //ProjectPackage pkg = new(value != null ? Path.Combine(modSources.ActionsParentPath, value) : value2);
+            CusProjectXml CusActions = new(value != null ? Path.Combine(modSources.ActionsParentPath, value) : value2)
             {
                 IsReadOnly = true
             };

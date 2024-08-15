@@ -64,7 +64,23 @@ namespace Aov_Mod_GUI.CustomModWd
             if (openFileDialog.ShowDialog() == true)
             {
                 SavePackagePath = openFileDialog.FileName;
-                infosPackage = new InfosPackage(SavePackagePath);
+                try
+                {
+                    if (FileExtension.IsZipValid(SavePackagePath))
+                    {
+                        infosPackage = new InfosPackage(SavePackagePath);
+                    }
+                    else
+                    {
+                        infosPackage = new(Path.GetFileName(SavePackagePath),
+                            PackageSerializer.Deserialize(DHAExtensions.GetAovBytesFrom(SavePackagePath)));
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("File không phải là aov infos file!!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }
                 Init();
             }
             else
@@ -212,10 +228,14 @@ namespace Aov_Mod_GUI.CustomModWd
         {
             if (IsReadOnly)
                 return;
+            InfoItem[] selectedItems = InfosTreeView.SelectedItems.Cast<InfoItem>().ToArray();
             InfoItem? selectedItem = InfosTreeView.SelectedItem as InfoItem;
             if (selectedItem == null || selectedItem.Parent == null)
                 return;
-            selectedItem.Parent.RemoveChild(selectedItem);
+            foreach (InfoItem item in selectedItems)
+            {
+                selectedItem.Parent.RemoveChild(item);
+            }
         }
 
         private void SaveInfoBtn_Click(object sender, RoutedEventArgs e)
@@ -234,6 +254,7 @@ namespace Aov_Mod_GUI.CustomModWd
             {
                 infosPackage.SaveTo(SavePackagePath);
             }
+            MessageBox.Show("Saved");
         }
 
         private void EditBtn_Click(object sender, RoutedEventArgs e)

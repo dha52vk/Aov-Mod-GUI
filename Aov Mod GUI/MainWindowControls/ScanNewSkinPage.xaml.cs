@@ -28,7 +28,7 @@ namespace Aov_Mod_GUI.MainWindowControls
     {
         List<Hero>? heroList { get => MainWindow.GetHeroList(); }
         ModSources? modSources { get => MainWindow.GetModSources(); }
-        SkinLevelWrapper? lvWrapper { get => MainWindow.GetSkinLevelWp(); }
+        SkinLevelWrapper? lvWrapper { get => MainWindow.GetSkinLevelWrapper(); }
 
         public ScanNewSkinPage()
         {
@@ -81,7 +81,7 @@ namespace Aov_Mod_GUI.MainWindowControls
                         };
                         if (inputWd.ShowDialog() == true)
                         {
-                            lvWrapper.SkinLabelLevels.Add(new(field.Text, int.Parse(inputWd.InputResult)));
+                            MainWindow.AddLabelLevel(new(field.Text, int.Parse(inputWd.InputResult)),true);
                         }
                         else
                         {

@@ -1,4 +1,5 @@
-﻿using Aov_Mod_GUI.Models;
+﻿using Aov_Mod_GUI.CustomModWd;
+using Aov_Mod_GUI.Models;
 using AovClass.Models;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,38 @@ namespace Aov_Mod_GUI
         {
             DialogResult = true;
             Close();
+        }
+
+        private void EditMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as FrameworkElement)?.Tag is not Skin s)
+            {
+                return;
+            }
+            EditSkinInfoWindow editSkinInfoWindow = new(s) { Owner = this };
+            if (editSkinInfoWindow.ShowDialog() == true)
+            {
+                MainWindow.SaveHeroList();
+                MainWindow.SaveModSources();
+            }
+        }
+
+        private void CopyIdMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as FrameworkElement)?.Tag is not Skin s)
+            {
+                return;
+            }
+            Clipboard.SetText(s.Id.ToString());
+        }
+
+        private void CopyNameMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as FrameworkElement)?.Tag is not Skin s)
+            {
+                return;
+            }
+            Clipboard.SetText(s.Name);
         }
     }
 }

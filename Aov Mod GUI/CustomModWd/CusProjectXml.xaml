@@ -211,7 +211,7 @@
                     </Button>
                 </StackPanel>
             </ScrollViewer>
-            <Button Grid.Column="1" x:Name="SaveActionBtn" Click="SaveActionBtn_Click"
+            <Button Grid.Column="1" x:Name="SaveActionBtn"
                     Margin="5" Content="Save" FontFamily="{StaticResource Montserrat Bold}"
                     FontSize="15"/>
         </Grid>

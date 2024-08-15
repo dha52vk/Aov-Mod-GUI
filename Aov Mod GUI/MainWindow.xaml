@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Aov_Mod_GUI" xmlns:mainwindowcontrols="clr-namespace:Aov_Mod_GUI.MainWindowControls"
         mc:Ignorable="d" Loaded="Window_Loaded" x:Name="MainWd"
-        Background="#1E1E1E" AllowsTransparency="True"
+        Background="#1E1E1E" AllowsTransparency="True" ShowActivated="False"
         WindowStyle="None" ResizeMode="CanResizeWithGrip"
         Title="AOV MOD BOT" Height="450" Width="800" MinWidth="500" MinHeight="300"
         SizeChanged="MainWd_SizeChanged" Closing="MainWd_Closing">
@@ -179,13 +179,13 @@
                         </Grid>
                     </Grid>
 
-                    <Grid x:Name="ScanNewPage" Visibility="Visible">
+                    <Grid x:Name="ScanNewPage" Visibility="Collapsed">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
                             <mainwindowcontrols:ScanNewSkinPage x:Name="ScanNewSkinPage"/>
                         </ScrollViewer>
                     </Grid>
 
-                    <Grid x:Name="SettingsPage" Visibility="Collapsed">
+                    <Grid x:Name="SettingsPage" Visibility="Visible">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
                                 <Label Content="Mod Sources: " Margin="5"
@@ -195,17 +195,21 @@
                                 <local:PathTextedit x:Name="AovVersionField" PathLabel="Aov Version:"/>
                                 <local:PathTextedit x:Name="LanguageCodeField" PathLabel="Language Code:"/>
                                 <local:PathTextedit x:Name="ResourcesPathField" PathLabel="Resources Path: " IsFolderSelect="True"/>
+                                <local:PathTextedit x:Name="SavePathField" PathLabel="Save Mod Path: " IsFolderSelect="True"/>
                                 <Separator Margin="10 5"/>
-                                <Label Content="Skin Levels: " Margin="5"
+                                <Label Content="Label Levels: " Margin="5"
                                        Foreground="White" FontFamily="{StaticResource Montserrat}" FontSize="18"/>
                                 <StackPanel x:Name="LabelLevelFieldContainer"/>
                                 <Button x:Name="AddLabelLevelField" Content="Add Label Level"
                                         FontSize="15" FontFamily="{StaticResource Montserrat}"
                                         Margin="0 0 10 5" Padding="30 7" HorizontalAlignment="Right"/>
+                                <Label Content="Special Skin Levels: " Margin="5"
+                                       Foreground="White" FontFamily="{StaticResource Montserrat}" FontSize="18"/>
                                 <StackPanel x:Name="SkinLevelFieldContainer"/>
                                 <Button x:Name="AddSkinLevelField" Content="Add Skin Level"
                                         FontSize="15" FontFamily="{StaticResource Montserrat}"
                                         Margin="0 0 10 5" Padding="30 7" HorizontalAlignment="Right"/>
+                                <Separator Margin="10 5"/>
                                 <Button x:Name="SaveSettingsButton" Content="Save All Settings"
                                         FontSize="15" FontFamily="{StaticResource Montserrat}"
                                         Margin="10 0 10 5" Padding="30 7"/>

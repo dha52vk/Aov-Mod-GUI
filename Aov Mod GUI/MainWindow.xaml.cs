@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Media;
+using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Windows;
@@ -40,6 +41,8 @@ namespace Aov_Mod_GUI
 
         public int MaxGridColumn = 150;
 
+        private static Panel? static_LabelLevelFieldContainter;
+        private static Panel? static_SkinLevelFieldContainter;
         public UniformGrid? ListItemUniformGrid;
         public UniformGrid? ListSkinSelectedUniformGrid;
         public List<FrameworkElement> UIPages = [];
@@ -51,6 +54,9 @@ namespace Aov_Mod_GUI
         public MainWindow()
         {
             InitializeComponent();
+            Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException; ;
+            static_LabelLevelFieldContainter = LabelLevelFieldContainer;
+            static_SkinLevelFieldContainter = SkinLevelFieldContainer;
 
             SaveSettingsButton.Click += SaveSettingsButton_Click;
             AddPackBtn.Click += AddPackBtn_Click;
@@ -58,6 +64,8 @@ namespace Aov_Mod_GUI
             SavePackBtn.Click += SavePackListBtn_Click;
             CommitSkinPackButton.Click += CommitSkinPackButton_Click;
             ConfigSkinPackBtn.Click += ConfigSkinPackBtn_Click;
+            AddLabelLevelField.Click += AddLabelLevelField_Click;
+            AddSkinLevelField.Click += AddSkinLevelField_Click;
 
             SelectSkinPackBackground.MouseDown += SelectPackBackground_MouseDown;
             ConfigSkinPacksBackground.MouseDown += ConfigSkinPacksBackground_MouseDown;
@@ -146,6 +154,43 @@ namespace Aov_Mod_GUI
             }
         }
 
+        private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            Exception ex = e.Exception;
+            LogExtension.Log("Exception " + ex.StackTrace ?? "");
+        }
+
+        private void AddSkinLevelField_Click(object sender, RoutedEventArgs e)
+        {
+            FilterField filterField = new()
+            {
+                FilterLabel = "Special:",
+                IsAttributeField = true,
+                IsNumberName = true,
+                IsNumberValue = true
+            };
+            filterField.RemoveClick = () =>
+            {
+                SkinLevelFieldContainer.Children.Remove(filterField);
+            };
+            SkinLevelFieldContainer.Children.Add(filterField);
+        }
+
+        private void AddLabelLevelField_Click(object sender, RoutedEventArgs e)
+        {
+            FilterField filterField = new()
+            {
+                FilterLabel = "Label:",
+                IsAttributeField = true,
+                IsNumberValue = true
+            };
+            filterField.RemoveClick = () =>
+            {
+                LabelLevelFieldContainer.Children.Remove(filterField);
+            };
+            LabelLevelFieldContainer.Children.Add(filterField);
+        }
+
         private void SavePackListBtn_Click(object sender, RoutedEventArgs e)
         {
             List<string> packNames = [];
@@ -221,6 +266,32 @@ namespace Aov_Mod_GUI
 
         private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
         {
+            if (modSources == null || levelWrapper == null)
+            {
+                return;
+            }
+            modSources.ChannelName = ChannelNameField.Text;
+            modSources.YtbLink = YoutubeLinkField.Text;
+            modSources.AovVersion = AovVersionField.Text;
+            modSources.LanguageCode = LanguageCodeField.Text;
+            modSources.ResourcesPath = ResourcesPathField.Text;
+            modSources.SaveModPath = SavePathField.Text;
+            foreach (FilterField field in LabelLevelFieldContainer.Children)
+            {
+                if (field.Tag == null && !string.IsNullOrEmpty(field.Value) && !string.IsNullOrEmpty(field.AttributeName))
+                {
+                    levelWrapper.SkinLabelLevels.Add(new(field.AttributeName, int.Parse(field.Value)));
+                }
+            }
+            foreach (FilterField field in SkinLevelFieldContainer.Children)
+            {
+                if (field.Tag == null && !string.IsNullOrEmpty(field.Value) && !string.IsNullOrEmpty(field.AttributeName))
+                {
+                    levelWrapper.SpecialSkinLevels.Add(new(int.Parse(field.AttributeName), int.Parse(field.Value)));
+                }
+            }
+            File.WriteAllText(DataPaths.SkinLevels, JsonConvert.SerializeObject(levelWrapper));
+            File.WriteAllText(DataPaths.ModSources, JsonConvert.SerializeObject(modSources));
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -388,10 +459,15 @@ namespace Aov_Mod_GUI
             {
                 if (modController != null)
                 {
-                    modController.UpdateProgress = (status) => progressWindow.UpdateProgress(0, status);
+                    modController.UpdateProgress = (status) =>
+                    {
+                        LogExtension.Log(status);
+                        progressWindow.UpdateProgress(0, status);
+                    };
                     string packname = "PackMod_" + DateTime.Now.ToString("MM.dd.yyyy HH:mm:ss");
                     modController.ModSkin(modList, packname);
                     File.WriteAllText(Path.Combine(modSources?.SaveModPath ?? "", ModController.MakeSimpleString(packname), "packinfo.txt"), content);
+                    MessageBox.Show("Saved");
                 }
             });
             progressWindow.ShowDialog();
@@ -428,6 +504,61 @@ namespace Aov_Mod_GUI
             levelWrapper = JsonConvert.DeserializeObject<SkinLevelWrapper>(File.ReadAllText(DataPaths.SkinLevels));
             modSources = JsonConvert.DeserializeObject<ModSources>(File.ReadAllText(DataPaths.ModSources));
             SkinPacks = [.. JsonConvert.DeserializeObject<SkinPackList>(File.ReadAllText(DataPaths.SkinPackList))?.SkinPacks];
+            #region ModSources Settings Init
+            if (modSources != null)
+            {
+                ChannelNameField.Text = modSources.ChannelName;
+                YoutubeLinkField.Text = modSources.YtbLink;
+                AovVersionField.Text = modSources.AovVersion;
+                LanguageCodeField.Text = modSources.LanguageCode;
+                ResourcesPathField.Text = modSources.ResourcesPath;
+                SavePathField.Text = modSources.SaveModPath;
+            }
+            #endregion
+            #region Label Wrapper
+            if (levelWrapper != null)
+            {
+                LabelLevelFieldContainer.Children.Clear();
+                foreach (var label in levelWrapper.SkinLabelLevels)
+                {
+                    FilterField filterField = new()
+                    {
+                        FilterLabel = "Label:",
+                        IsAttributeField = true,
+                        AttributeName = label.label,
+                        Value = label.skinLevel.ToString(),
+                        IsNumberValue = true,
+                        Tag = label
+                    };
+                    filterField.RemoveClick = () =>
+                    {
+                        LabelLevelFieldContainer.Children.Remove(filterField);
+                        levelWrapper.SkinLabelLevels.Remove(label);
+                    };
+                    LabelLevelFieldContainer.Children.Add(filterField);
+                }
+                SkinLevelFieldContainer.Children.Clear();
+                foreach (var specialLevel in levelWrapper.SpecialSkinLevels)
+                {
+                    FilterField filterField = new()
+                    {
+                        FilterLabel = "Special:",
+                        IsAttributeField = true,
+                        AttributeName = specialLevel.id.ToString(),
+                        Value = specialLevel.skinLevel.ToString(),
+                        IsNumberValue = true,
+                        Tag = specialLevel
+                    };
+                    filterField.RemoveClick = () =>
+                    {
+                        SkinLevelFieldContainer.Children.Remove(filterField);
+                        levelWrapper.SpecialSkinLevels.Remove(specialLevel);
+                    };
+                    SkinLevelFieldContainer.Children.Add(filterField);
+                }
+
+            }
+            #endregion
             foreach (SkinPack skinPack in SkinPacks)
             {
                 SkinPackField field = new()
@@ -459,6 +590,42 @@ namespace Aov_Mod_GUI
             }
         }
 
+        public static void SaveHeroList()
+        {
+            if (Heroes != null)
+                File.WriteAllText(DataPaths.HeroList, JsonConvert.SerializeObject(new HeroList() { Heros = [.. Heroes] }));
+        }
+
+        public static void SaveModSources()
+        {
+            if (modSources != null)
+                File.WriteAllText(DataPaths.ModSources, JsonConvert.SerializeObject(modSources));
+        }
+
+        public static void AddLabelLevel(SkinLabel label, bool save = false)
+        {
+            FilterField filterField = new()
+            {
+                FilterLabel = "Label:",
+                IsAttributeField = true,
+                AttributeName = label.label,
+                Value = label.skinLevel.ToString(),
+                IsNumberValue = true,
+                Tag = label
+            };
+            filterField.RemoveClick = () =>
+            {
+                static_LabelLevelFieldContainter?.Children.Remove(filterField);
+                levelWrapper?.SkinLabelLevels.Remove(label);
+            };
+            static_LabelLevelFieldContainter?.Children.Add(filterField);
+            levelWrapper?.SkinLabelLevels.Add(label);
+            if (save)
+            {
+                File.WriteAllText(DataPaths.SkinLevels, JsonConvert.SerializeObject(levelWrapper));
+            }
+        }
+
         public static List<Hero>? GetHeroList()
         {
             return Heroes?.ToList();
@@ -469,7 +636,7 @@ namespace Aov_Mod_GUI
             return modSources;
         }
 
-        public static SkinLevelWrapper? GetSkinLevelWp()
+        public static SkinLevelWrapper? GetSkinLevelWrapper()
         {
             return levelWrapper;
         }

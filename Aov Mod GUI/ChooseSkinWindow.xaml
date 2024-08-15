@@ -32,6 +32,13 @@
                                                    FontFamily="Montserrat Medium" FontSize="12" Foreground="Black"
                                                    Padding="5 10" TextAlignment="Center" VerticalAlignment="Center"/>
                             </StackPanel>
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Copy Skin Id" Tag="{Binding}" Click="CopyIdMenuItem_Click"/>
+                                    <MenuItem Header="Copy Skin Name" Tag="{Binding}" Click="CopyNameMenuItem_Click"/>
+                                    <MenuItem Header="Edit" Tag="{Binding}" Click="EditMenuItem_Click"/>
+                                </ContextMenu>
+                            </Border.ContextMenu>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -55,10 +62,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="CancelButton" Grid.Column="0" BorderThickness="0" Background="Red" Click="CancelButton_Click">
+            <Button x:Name="CancelButton" Grid.Column="0" BorderThickness="0" Background="#FFFF2C2C" Click="CancelButton_Click">
                 <Image Source="/images/ic_x.png" Margin="5"/>
             </Button>
-            <Button x:Name="SubmitButton" Grid.Column="1" BorderThickness="0" Background="LawnGreen" Click="SubmitButton_Click">
+            <Button x:Name="SubmitButton" Grid.Column="1" BorderThickness="0" Background="#FF8FFF23" Click="SubmitButton_Click">
                 <Image Source="/images/ic_tick.png" Margin="2"/>
             </Button>
         </Grid>

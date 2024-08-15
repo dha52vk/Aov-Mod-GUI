@@ -7,6 +7,8 @@ using System.Windows.Media;
 using System.Windows;
 using System.Windows.Media.Animation;
 using System.IO;
+using System.IO.Compression;
+using AovClass;
 
 namespace Aov_Mod_GUI.Models
 {
@@ -39,6 +41,12 @@ namespace Aov_Mod_GUI.Models
             if (sb != null)
                 sb.Begin();
         }
+
+        public static byte[] GetAovBytesFrom(string path)
+        {
+            byte[] outputBytes = File.ReadAllBytes(path);
+            return AovTranslation.Decompress(outputBytes) ?? outputBytes;
+        }
     }
 
     internal static class LogExtension
@@ -56,6 +64,23 @@ namespace Aov_Mod_GUI.Models
             //if (!File.Exists(logFilePath))
             //    File.Create(logFilePath);
             File.AppendAllText("log.txt", DateTime.Now.ToString("[MM/dd/yyyy HH:mm:ss]") + "   " + logMessage.TrimStart().TrimEnd() + "\n");
+        }
+    }
+
+    internal static class FileExtension
+    {
+        public static bool IsZipValid(string path)
+        {
+            try
+            {
+                using var zipFile = ZipFile.OpenRead(path);
+                var entries = zipFile.Entries;
+                return true;
+            }
+            catch (InvalidDataException)
+            {
+                return false;
+            }
         }
     }
 

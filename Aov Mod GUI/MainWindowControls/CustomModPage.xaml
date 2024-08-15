@@ -48,8 +48,6 @@
                     </CheckBox.Template>
                 </CheckBox>
             </Grid>
-            <!--<aov_mod_gui:PathTextedit x:Name="LabelNewId" PathLabel="Label New Id: "
-        FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
             <Grid Margin="10 0" x:Name="LabelFieldRow">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" MaxWidth="250"/>
@@ -61,10 +59,6 @@
             </Grid>
             <aov_mod_gui:PathTextedit x:Name="SoundNewIds" PathLabel="Sound New Ids: "
             FontSize="15" FontFamily="{StaticResource Montserrat}" ToolTip="Split By ';'"/>
-            <!--<Button x:Name="CustomIconBtn" Content="Custom Actor Icon, Label" Padding="10"  Margin="10 5"
-            FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
-            <!--<Button x:Name="TestBtn" Content="Test" Padding="10"  Margin="10 5"
-            FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
             <Button x:Name="CustomInfoBtn" Content="Custom Actor Infos" Padding="10"  Margin="10 5"
             FontSize="15" FontFamily="{StaticResource Montserrat}"/>
             <Button x:Name="CustomActionBtn" Content="Custom Actor Actions" Padding="10"  Margin="10 5"
@@ -73,8 +67,8 @@
             FontSize="15" FontFamily="{StaticResource Montserrat}"/>
             <Button x:Name="UpdateFromOlderBtn" Content="Update From Older version" Padding="10"  Margin="10 5"
             FontSize="15" FontFamily="{StaticResource Montserrat}"/>
-            <!--<Button x:Name="CustomSoundBtn" Content="Custom Actor Sound" Padding="10"  Margin="10 5"
-            FontSize="15" FontFamily="{StaticResource Montserrat}"/>-->
+            <Button x:Name="CombineCustomPackBtn" Content="Combine Custom Packs" Padding="10"  Margin="10 5"
+            FontSize="15" FontFamily="{StaticResource Montserrat}"/>
 
             <Separator Margin="10 10 10 15"/>
 

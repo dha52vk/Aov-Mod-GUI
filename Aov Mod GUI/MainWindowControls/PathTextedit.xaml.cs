@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,6 +25,7 @@ namespace Aov_Mod_GUI
         public string? PathLabel { get; set; }
         public bool IsFileSelect { get; set; }
         public bool IsFolderSelect { get; set; }
+        public bool IsNumberField { get; set; }
         public string Text
         {
             get => PathTextbox.Text;
@@ -40,6 +42,16 @@ namespace Aov_Mod_GUI
             DataContext = this;
 
             Loaded += PathTextedit_Loaded;
+            PathTextbox.PreviewTextInput += PathTextbox_PreviewTextInput;
+        }
+
+        private void PathTextbox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (IsNumberField)
+            {
+                Regex regex = new Regex("[^0-9]+");
+                e.Handled = regex.IsMatch(e.Text);
+            }
         }
 
         private void PathTextedit_Loaded(object sender, RoutedEventArgs e)

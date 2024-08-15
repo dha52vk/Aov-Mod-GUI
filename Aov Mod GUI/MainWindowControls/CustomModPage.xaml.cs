@@ -28,7 +28,7 @@ namespace Aov_Mod_GUI.MainWindowControls
         ProjectPackage? commonActionsPkg;
         ModSources? modSources { get => MainWindow.GetModSources(); }
         List<Hero>? heroes { get => MainWindow.GetHeroList(); }
-        SkinLevelWrapper? skinLvWp { get => MainWindow.GetSkinLevelWp(); }
+        SkinLevelWrapper? skinLvWp { get => MainWindow.GetSkinLevelWrapper(); }
         List<Skin> OldSkins = [];
         List<string> SoundKeyAcceptMulti = ["BattleBank.bytes"];
 
@@ -46,6 +46,7 @@ namespace Aov_Mod_GUI.MainWindowControls
                 FolderSavePath.SetReadOnly(value);
                 CustomHeroId.SetReadOnly(value);
                 CustomSkinName.SetReadOnly(value);
+                CombineCustomPackBtn.Visibility = value ? Visibility.Collapsed : Visibility.Visible;
             }
         }
         string ParentSavePath = "";
@@ -80,7 +81,8 @@ namespace Aov_Mod_GUI.MainWindowControls
             "Databin/Client/Sound/HeroSound.bytes",
             "Databin/Client/Sound/LobbyBank.bytes",
             "Databin/Client/Sound/LobbySound.bytes",
-            "Prefab_Characters\\Actor_{0}_Infos.pkg.bytes"
+            "Prefab_Characters\\Actor_{0}_Infos.pkg.bytes",
+            "version.txt"
         ];
 
         public CustomModPage()
@@ -93,8 +95,15 @@ namespace Aov_Mod_GUI.MainWindowControls
             CustomActionBtn.Click += CustomActionBtn_Click;
             CustomCommonActionsBtn.Click += CustomCommonActionsBtn_Click;
             UpdateFromOlderBtn.Click += UpdateFromOlderBtn_Click;
+            CombineCustomPackBtn.Click += CombineCustomPackBtn_Click;
         }
 
+        private void CombineCustomPackBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Chưa cập nhật tính năng này!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        Dictionary<string, string> actionResources = [];
         private void UpdateFromOlderBtn_Click(object sender, RoutedEventArgs e)
         {
             if (!FolderGenerated)
@@ -216,6 +225,7 @@ namespace Aov_Mod_GUI.MainWindowControls
         }
         private void UpdateTempProject(ProjectPackage package, ProjectPackage tempPackage, Func<string, bool>? keyFilter = null)
         {
+            actionResources = [];
             foreach (var pair in tempPackage.Projects)
             {
                 if ((keyFilter != null && !keyFilter(pair.Key)) || !package.Projects.ContainsKey(pair.Key))
@@ -265,25 +275,8 @@ namespace Aov_Mod_GUI.MainWindowControls
                     }
                     i++;
                 }
-                //foreach (XmlNode tempTrack in tempActions)
-                //{
-                //    if (tempTrack.Attributes == null)
-                //    {
-                //        continue;
-                //    }
-                //    XmlNode? track = actions.Find((node) => node.GetAttribute("guid") == tempTrack.GetAttribute("guid"));
-                //    if (track != null)
-                //    {
-                //        UpdateTempAction(track, tempTrack);
-                //    }
-                //    else
-                //    {
-                //        project.AppendActionNode(tempTrack);
-                //        Trace.WriteLine("Added action " + tempTrack.GetAttribute("trackName"));
-                //        LogExtension.Log("Added action " + tempTrack.GetAttribute("trackName"));
-                //    }
-                //}
             }
+            if (assetRefElement != null) UpdateAssetRef(assetRefElement, actionResources);
         }
         private void UpdateTempAction(XmlNode node, XmlNode tempNode)
         {
@@ -299,7 +292,7 @@ namespace Aov_Mod_GUI.MainWindowControls
                             XmlNode? condi = node.OwnerDocument?.ImportNode(tempChild, true);
                             if (condi != null)
                             {
-                                node.InsertChild(0,condi);
+                                node.InsertChild(0, condi);
                                 LogExtension.Log("Added condition " + condi.GetAttribute("guid") + " to " + node.GetAttribute("trackName") + $"({node.GetAttribute("guid")})");
                             }
                         }
@@ -333,6 +326,8 @@ namespace Aov_Mod_GUI.MainWindowControls
             }
             else if (node.GetAttribute("name") == tempNode.GetAttribute("name"))
             {
+                string? value = node.GetAttribute("value"),
+                    tempValue = tempNode.GetAttribute("value");
                 if (node.GetAttribute("value") != tempNode.GetAttribute("value"))
                 {
                     Trace.WriteLine("Updated " + node.GetAttribute("name") + " from " + node.GetAttribute("value") + " to "
@@ -340,10 +335,33 @@ namespace Aov_Mod_GUI.MainWindowControls
                     LogExtension.Log("Updated " + node.GetAttribute("name") + " from " + node.GetAttribute("value") + " to "
                         + tempNode.GetAttribute("value"));
                 }
+                if (value != null && tempValue != null &&
+                    value.Contains("prefab", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    actionResources[value] = tempValue;
+                }
                 XmlNode? clone = node.OwnerDocument?.ImportNode(tempNode, true);
                 if (clone != null)
                     node.ParentNode?.InsertBefore(clone, node);
                 node.ParentNode?.RemoveChild(node);
+            }
+        }
+        private void UpdateAssetRef(PackageElement pkgE, Dictionary<string, string> assets)
+        {
+            if (pkgE.Children != null)
+            {
+                foreach (var child in pkgE.Children)
+                {
+                    UpdateAssetRef(child, assets);
+                }
+            }
+            else if (pkgE.Value != null)
+            {
+                string value = pkgE._Value;
+                if (assets.TryGetValue(value, out string? newValue))
+                {
+                    pkgE._Value = newValue;
+                }
             }
         }
 
@@ -551,7 +569,7 @@ namespace Aov_Mod_GUI.MainWindowControls
                 LabelCombobox.ItemsSource = sources;
             }
             CustomModControl.Visibility = Visibility.Visible;
-            OldSkins = [new(){Id=int.Parse(CustomHeroId.Text+"1"), Label = "Default", Name=""}];
+            OldSkins = [new() { Id = int.Parse(CustomHeroId.Text + "1"), Label = "Default", Name = "" }];
             OldSkins.AddRange(heroes?.Find((hero) => hero.Id == int.Parse(CustomHeroId.GetText()))?.Skins ?? []);
             string InfosPath = infoPath,
                 AssetRefPath = assetrefPath,

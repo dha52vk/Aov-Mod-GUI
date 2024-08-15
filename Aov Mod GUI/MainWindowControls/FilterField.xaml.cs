@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,8 +22,8 @@ namespace Aov_Mod_GUI.MainWindowControls
     public partial class FilterField : UserControl
     {
         public string? FilterLabel { get; set; }
-        public string Value { get; set; }
-        public string AttributeName { get; set; }
+        public string? Value { get; set; }
+        public string? AttributeName { get; set; }
         private bool _IsAttributeField;
         public bool IsAttributeField { get => _IsAttributeField; set
             {
@@ -33,6 +34,8 @@ namespace Aov_Mod_GUI.MainWindowControls
                     NameColumn.Width = new(0);
             }
         }
+        public bool IsNumberValue { get; set; } = false;
+        public bool IsNumberName { get; set; } = false;
         public Action? RemoveClick { get; set; }
 
         public FilterField()
@@ -44,6 +47,24 @@ namespace Aov_Mod_GUI.MainWindowControls
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             RemoveClick?.Invoke();
+        }
+
+        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (IsNumberValue)
+            {
+                Regex regex = new("[^0-9]+");
+                e.Handled = regex.IsMatch(e.Text);
+            }
+        }
+
+        private void TextBox_PreviewTextInput_1(object sender, TextCompositionEventArgs e)
+        {
+            if (IsNumberName)
+            {
+                Regex regex = new("[^0-9]+");
+                e.Handled = regex.IsMatch(e.Text);
+            }
         }
     }
 }
