@@ -22,6 +22,7 @@ namespace Aov_Mod_GUI.MainWindowControls
     public partial class SkinPackField : UserControl
     {
         public string FieldLabel { get => TitleLabel.Content.ToString()??""; set => TitleLabel.Content = value; }
+        public FontFamily TextFont { get; set; }
         public Brush TextColor { get; set; }
         public double FieldFontSize { get; set; }
         public RoutedEventHandler? RemoveButtonClick;
@@ -43,6 +44,7 @@ namespace Aov_Mod_GUI.MainWindowControls
             DataContext = this;
             FieldFontSize = 18;
             TextColor = Brushes.White;
+            TextFont = new FontFamily("Arial");
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

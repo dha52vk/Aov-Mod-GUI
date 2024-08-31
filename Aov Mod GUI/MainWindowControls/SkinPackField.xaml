@@ -9,6 +9,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="30"/>
         </Grid.ColumnDefinitions>
@@ -16,11 +17,12 @@
         <Label Grid.Column="0" x:Name="TitleLabel" VerticalAlignment="Center"
                Foreground="{Binding TextColor}" FontFamily="{StaticResource Montserrat}"/>
 
-        <TextBlock Grid.Column="1" Text=":" Foreground="{Binding TextColor}"/>
-        <TextBlock Grid.Column="1" x:Name="SkinListTxt" TextWrapping="Wrap"
+        <TextBlock Grid.Column="1" Text=":" Foreground="{Binding TextColor}"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Column="2" x:Name="SkinListTxt" TextWrapping="Wrap"
                    Foreground="{Binding TextColor}" VerticalAlignment="Center"/>
 
-        <Button Grid.Column="2" Background="Transparent" Click="Button_Click">
+        <Button Grid.Column="3" Background="Transparent" Click="Button_Click">
             <Image Source="/images/ic_subtract.png"/>
         </Button>
     </Grid>

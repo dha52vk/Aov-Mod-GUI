@@ -155,7 +155,7 @@
                                             </ComboBox.Resources>
                                         </ComboBox>
                                     </Grid>
-                                    <Button Content="Show" Padding="30 5" HorizontalAlignment="Right" Margin="20 5"
+                                    <Button Content="Add" Padding="30 5" HorizontalAlignment="Right" Margin="20 5"
                                             x:Name="CommitSkinPackButton"/>
                                 </StackPanel>
                             </Border>
@@ -171,8 +171,6 @@
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                         <Button Name="AddPackBtn" Content="Add This Pack" Margin="15 5 15 0"
                                                 Width="100" Height="27"/>
-                                        <Button Name="SavePackBtn" Content="Save Pack Skin List" Margin="15 5 15 0"
-                                                Width="100" Height="27"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -185,7 +183,7 @@
                         </ScrollViewer>
                     </Grid>
 
-                    <Grid x:Name="SettingsPage" Visibility="Visible">
+                    <Grid x:Name="SettingsPage" Visibility="Collapsed">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
                                 <Label Content="Mod Sources: " Margin="5"
@@ -237,6 +235,10 @@
                         </Grid>
                     </Grid>
 
+                    <Grid x:Name="MultiModPage" Visibility="Visible">
+                        <mainwindowcontrols:MultiModPage/>
+                    </Grid>
+                    
                     <Grid x:Name="CustomPage" Visibility="Collapsed">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
                             <mainwindowcontrols:CustomModPage x:Name="MainCustomModPage"/>
@@ -281,6 +283,8 @@
                                        MenuIconSource="/images/ic_settings.png" MenuLabel="Cài đặt"/>
                 <local:MenuRadioButton Checked="MenuBtn_Checked" Tag="ImportPage"
                                        MenuIconSource="/images/ic_import.png" MenuLabel="Nhập dữ liệu"/>
+                <local:MenuRadioButton Checked="MenuBtn_Checked" Tag="MultiModPage"
+                                       MenuIconSource="/images/ic_multi.png" MenuLabel="Multi Mod"/>
                 <local:MenuRadioButton Checked="MenuBtn_Checked" Tag="CustomPage"
                                        MenuIconSource="/images/ic_custom.png" MenuLabel="Mod Tùy Chỉnh"/>
             </StackPanel>

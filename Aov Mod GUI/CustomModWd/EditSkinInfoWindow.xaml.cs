@@ -123,7 +123,8 @@ namespace Aov_Mod_GUI.CustomModWd
                 skin.ParticleNotMod = [];
                 foreach (PathTextedit textedit in ParticleNotModContainer.Children)
                 {
-                    skin.ParticleNotMod.Add(textedit.Text);
+                    if (!string.IsNullOrEmpty(textedit.Text))
+                        skin.ParticleNotMod.Add(textedit.Text);
                 }
             }
             else
@@ -136,7 +137,8 @@ namespace Aov_Mod_GUI.CustomModWd
                 skin.FilenameNotMod = [];
                 foreach (PathTextedit textedit in FileNameNotModContainer.Children)
                 {
-                    skin.FilenameNotMod.Add(textedit.Text);
+                    if (!string.IsNullOrEmpty(textedit.Text))
+                        skin.FilenameNotMod.Add(textedit.Text);
                 }
             }
             else
@@ -149,7 +151,8 @@ namespace Aov_Mod_GUI.CustomModWd
                 skin.FilenameNotModCheckId = [];
                 foreach (PathTextedit textedit in FileNameNotModCheckIdContainer.Children)
                 {
-                    skin.FilenameNotModCheckId.Add(textedit.Text);
+                    if (!string.IsNullOrEmpty(textedit.Text))
+                        skin.FilenameNotModCheckId.Add(textedit.Text);
                 }
             }
             else

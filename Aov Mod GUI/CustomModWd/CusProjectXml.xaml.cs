@@ -520,7 +520,7 @@ namespace Aov_Mod_GUI.CustomModWd
                 {
                     return node.GetAttribute("objectName") ?? "";
                 }
-                else if (node?.Name == "Vector3i" || node?.Name == "Vector3")
+                else if (node?.Name == "Vector3i" || node?.Name == "Vector3" || node?.Name == "EulerAngle")
                 {
                     return $"x: {node.GetAttribute("x")}, y: {node.GetAttribute("y")}, z: {node.GetAttribute("z")}";
                 }
@@ -581,19 +581,20 @@ namespace Aov_Mod_GUI.CustomModWd
         {
             get
             {
-                if (node?.Name == "Condition")
+                if (node?.Name == "Condition" || node?.Name == "TrackObject")
                 {
                     XmlNode? Track = Root?.GetActionNodes()?.Find((track) => track.GetAttribute("guid") == node.GetAttribute("guid"));
                     XmlNodeList? list = Track?.GetChildrenByName("Event")?[0].ChildNodes;
                     string parameters = "";
                     if (list != null)
                     {
-                        foreach (XmlNode param in list)
-                        {
-                            parameters += (param.GetAttribute("name") ?? "") + ": " + (param.GetAttribute("value") ?? "") + ", ";
-                        }
+                        //foreach (XmlNode param in list)
+                        //{
+                        //    parameters += (param.GetAttribute("name") ?? "") + ": " + (param.GetAttribute("value") ?? "") + ", ";
+                        //}
+                        parameters = string.Join(", ", list.Cast<XmlNode>().Select(param => (param.GetAttribute("name") ?? "") + ": " + (param.GetAttribute("value") ?? "")));
                     }
-                    return (Track?.GetAttribute("eventType") + " - " ?? "") + parameters;
+                    return (node?.Name == "TrackObject" ? "" : node?.GetAttribute("status") + ": ") + (Track?.GetAttribute("eventType") + " - " ?? "") + parameters;
                 }
                 else
                     return "";

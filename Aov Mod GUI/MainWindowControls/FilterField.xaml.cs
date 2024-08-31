@@ -22,8 +22,8 @@ namespace Aov_Mod_GUI.MainWindowControls
     public partial class FilterField : UserControl
     {
         public string? FilterLabel { get; set; }
-        public string? Value { get; set; }
-        public string? AttributeName { get; set; }
+        public string Value { get; set; }
+        public string AttributeName { get; set; }
         private bool _IsAttributeField;
         public bool IsAttributeField { get => _IsAttributeField; set
             {
@@ -42,6 +42,8 @@ namespace Aov_Mod_GUI.MainWindowControls
         {
             InitializeComponent();
             DataContext = this;
+            AttributeName = "";
+            Value = "";
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

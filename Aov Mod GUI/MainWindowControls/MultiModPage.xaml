@@ -1,0 +1,94 @@
+﻿<UserControl x:Class="Aov_Mod_GUI.MainWindowControls.MultiModPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Aov_Mod_GUI.MainWindowControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <ScrollViewer>
+            <StackPanel>
+                <StackPanel x:Name="HeroFieldContainer"/>
+                <Grid HorizontalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" MinWidth="200"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox Grid.Column="0" Margin="5" x:Name="AddHeroComboBox"
+                              FontFamily="{StaticResource Montserrat}" FontSize="18">
+                        <ComboBox.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="Black" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                            </Style>
+                        </ComboBox.Resources>
+                    </ComboBox>
+                    <Button Margin="5" Content="Add Hero" x:Name="AddHeroButton" Grid.Column="1" Padding="10 5"
+                            FontFamily="{StaticResource Montserrat}" FontSize="18"/>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid x:Name="SelectSkinPackGrid">
+            <Border Background="#CC000000" x:Name="SelectSkinPackBackground"/>
+            <Border VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20 10"
+                                    Background="#1E1E1E" BorderBrush="White" BorderThickness="1">
+                <StackPanel>
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="2*" MinWidth="200"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Select Pack: " FontFamily="{StaticResource Montserrat ExtraBold Italic}"
+                                               Foreground="White" FontSize="18"/>
+                        <ComboBox x:Name="SkinPacksCbb" Grid.Column="1"
+                                                  FontFamily="{StaticResource Montserrat}" FontSize="15">
+                            <ComboBox.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Style>
+                            </ComboBox.Resources>
+                        </ComboBox>
+                    </Grid>
+                    <Button Content="Add" Padding="30 5" HorizontalAlignment="Right" Margin="20 5"
+                                            x:Name="CommitSkinPackButton"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+        <Grid x:Name="ConfigSkinPacksGrid">
+            <Border Background="#CC000000" x:Name="ConfigSkinPacksBackground"/>
+            <Border VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20 10"
+                                    Background="#1E1E1E" BorderBrush="White" BorderThickness="1"
+                                    MaxWidth="{Binding ElementName=GridRectPopup, Path=Width}"
+                                    MaxHeight="{Binding ElementName=GridRectPopup, Path=Height}">
+                <StackPanel>
+                    <StackPanel x:Name="SkinPackContainer"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Name="AddPackBtn" Content="Add This Pack" Margin="15 5 15 0"
+                                                Width="100" Height="27"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border BorderThickness="1" BorderBrush="White" Grid.Row="1"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Margin="5" Content="Config Multi Pack" x:Name="ConfigMultiModPackButton" Grid.Column="0"
+                FontFamily="{StaticResource Montserrat}" FontSize="18"/>
+            <Button Margin="5" Content="Add Pack" x:Name="AddMultiModPackButton" Grid.Column="1"
+                FontFamily="{StaticResource Montserrat}" FontSize="18"/>
+            <Button Margin="5" Content="Start" x:Name="StartMultiModButton" Grid.Column="2"
+                FontFamily="{StaticResource Montserrat}" FontSize="18"/>
+        </Grid>
+    </Grid>
+</UserControl>

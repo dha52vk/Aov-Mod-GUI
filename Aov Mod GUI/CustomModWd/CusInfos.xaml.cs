@@ -26,7 +26,7 @@ namespace Aov_Mod_GUI.CustomModWd
     public partial class CusInfos : Window
     {
         ModSources? modSources { get => MainWindow.GetModSources(); }
-        readonly InfosPackage infosPackage;
+        readonly InfosPackage? infosPackage;
         public static List<InfoItem>? ItemsCopied { get; set; }
         ObservableCollection<InfoItem> itemSources = [];
         bool _IsReadOnly = false;
@@ -102,7 +102,7 @@ namespace Aov_Mod_GUI.CustomModWd
             ShowOtherPage.Visibility = Visibility.Collapsed;
             ClearFilterBtn.Visibility = Visibility.Collapsed;
 
-            this.Title = infosPackage.PackageTitle;
+            this.Title = infosPackage?.PackageTitle;
             ItemsCopied = [];
             ReloadSources();
         }
@@ -110,7 +110,7 @@ namespace Aov_Mod_GUI.CustomModWd
         public void ReloadSources()
         {
             itemSources = [];
-            foreach (var pair in infosPackage.Elements)
+            foreach (var pair in infosPackage?.Elements ?? [])
             {
                 itemSources.Add(new(pair.Value, null) { Name = pair.Key });
             }
@@ -252,7 +252,7 @@ namespace Aov_Mod_GUI.CustomModWd
             }
             else
             {
-                infosPackage.SaveTo(SavePackagePath);
+                infosPackage?.SaveTo(SavePackagePath);
             }
             MessageBox.Show("Saved");
         }

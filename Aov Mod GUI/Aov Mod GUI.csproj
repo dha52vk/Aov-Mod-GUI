@@ -18,6 +18,7 @@
     <None Remove="images\ic_edit.png" />
     <None Remove="images\ic_import.png" />
     <None Remove="images\ic_insert_row.png" />
+    <None Remove="images\ic_multi.png" />
     <None Remove="images\ic_paste.png" />
     <None Remove="images\ic_paste_as_child.png" />
     <None Remove="images\ic_paste_in_same_parent.png" />
@@ -39,9 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="AovClass">
-      <HintPath>..\..\AovClass\AovClass\bin\Debug\net8.0\AovClass.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\AovClass\AovClass\AovClass.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -89,6 +88,7 @@
     </Resource>
     <Resource Include="images\ic_import.png" />
     <Resource Include="images\ic_insert_row.png" />
+    <Resource Include="images\ic_multi.png" />
     <Resource Include="images\ic_paste.png" />
     <Resource Include="images\ic_paste_as_child.png" />
     <Resource Include="images\ic_paste_in_same_parent.png" />

@@ -1,26 +1,17 @@
-﻿using Aov_Mod_GUI.CustomModWd;
-using Aov_Mod_GUI.MainWindowControls;
+﻿using Aov_Mod_GUI.MainWindowControls;
 using Aov_Mod_GUI.Models;
 using Aov_Mod_GUI.Models.DataSave;
 using AovClass;
 using AovClass.Models;
 using Microsoft.Win32;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Media;
-using System.Reflection.Emit;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace Aov_Mod_GUI
@@ -34,6 +25,7 @@ namespace Aov_Mod_GUI
 
         private static ObservableCollection<Hero>? Heroes;
         private static ObservableCollection<SkinPack> SkinPacks = [];
+        private static ObservableCollection<MultiSkinPack> MultiSkinPacks = [];
         private static ModSources? modSources;
         private static SkinLevelWrapper? levelWrapper;
         private static ModController? modController;
@@ -61,7 +53,6 @@ namespace Aov_Mod_GUI
             SaveSettingsButton.Click += SaveSettingsButton_Click;
             AddPackBtn.Click += AddPackBtn_Click;
             AddSkinsBtn.Click += AddSkinsBtn_Click;
-            SavePackBtn.Click += SavePackListBtn_Click;
             CommitSkinPackButton.Click += CommitSkinPackButton_Click;
             ConfigSkinPackBtn.Click += ConfigSkinPackBtn_Click;
             AddLabelLevelField.Click += AddLabelLevelField_Click;
@@ -100,6 +91,10 @@ namespace Aov_Mod_GUI
             if (!File.Exists(DataPaths.SkinPackList))
             {
                 File.WriteAllText(DataPaths.SkinPackList, JsonConvert.SerializeObject(new SkinPackList([.. SkinPacks])));
+            }
+            if (!File.Exists(DataPaths.MultiSkinPackList))
+            {
+                File.WriteAllText(DataPaths.MultiSkinPackList, JsonConvert.SerializeObject(new MultiSkinPackList([.. MultiSkinPacks])));
             }
             if (!File.Exists(DataPaths.HeroList))
             {
@@ -191,25 +186,6 @@ namespace Aov_Mod_GUI
             LabelLevelFieldContainer.Children.Add(filterField);
         }
 
-        private void SavePackListBtn_Click(object sender, RoutedEventArgs e)
-        {
-            List<string> packNames = [];
-            foreach (SkinPackField field in SkinPackContainer.Children)
-            {
-                if (field.Tag is string s)
-                    packNames.Add(s);
-            }
-            var packs = SkinPacks.Where(pack => packNames.Contains(pack.PackName));
-            SkinPacks.Clear();
-            foreach (var pack in packs)
-            {
-                SkinPacks.Add(pack);
-            }
-            File.WriteAllText(DataPaths.SkinPackList, JsonConvert.SerializeObject(new SkinPackList([.. SkinPacks])));
-            SkinPacksCbb.ItemsSource = SkinPacks;
-            ConfigSkinPacksGrid.Visibility = Visibility.Collapsed;
-        }
-
         private void ConfigSkinPacksBackground_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             ConfigSkinPacksGrid.Visibility = Visibility.Collapsed;
@@ -227,7 +203,7 @@ namespace Aov_Mod_GUI
                 List<Skin>? skins = Heroes?.SelectMany(h => h.Skins ?? []).ToList();
                 if (skins != null)
                 {
-                    var skinIdAdds = pack.SkinIds.Where(id => SkinsSelected.Where(s => s.Id == id).Count() == 0);
+                    var skinIdAdds = pack.SkinIds.Where(id => !SkinsSelected.Any(s => s.Id == id));
                     foreach (var skinId in skinIdAdds)
                     {
                         var skin = skins.Find(s => s.Id == skinId);
@@ -255,11 +231,26 @@ namespace Aov_Mod_GUI
         {
             if (SkinsSelected.Count < 2)
                 return;
-            SkinPacks.Clear();
             InputFieldWindow inputWd = new() { Owner = this, Label = "Nhập tên pack:" };
             if (inputWd.ShowDialog() == true)
             {
-                SkinPacks.Add(new(inputWd.InputResult, SkinsSelected.Select(s => s.Id).ToList()));
+                SkinPack skinPack = new(inputWd.InputResult, SkinsSelected.Select(s => s.Id).ToList());
+                SkinPackField field = new()
+                {
+                    FieldLabel = skinPack.PackName,
+                    SkinList = skinPack.SkinIds,
+                    Tag = skinPack.PackName,
+                    FontSize = 18,
+                    TextColor = Brushes.White
+                };
+                field.RemoveButtonClick = (sender, e) =>
+                {
+                    SkinPackContainer.Children.Remove(field);
+                    SkinPacks.Remove(skinPack);
+                    SaveSkinPacks();
+                };
+                SkinPackContainer.Children.Add(field);
+                SkinPacks.Add(skinPack);
                 File.WriteAllText(DataPaths.SkinPackList, JsonConvert.SerializeObject(new SkinPackList([.. SkinPacks])));
             }
         }
@@ -445,7 +436,7 @@ namespace Aov_Mod_GUI
             if (SkinsSelected == null)
                 return;
 
-            List<ModInfo> modList = new();
+            List<ModInfo> modList = [];
             foreach (Skin skin in SkinsSelected)
             {
                 content += $"  + {skin.Name}\n";
@@ -467,10 +458,10 @@ namespace Aov_Mod_GUI
                     string packname = "PackMod_" + DateTime.Now.ToString("MM.dd.yyyy HH:mm:ss");
                     modController.ModSkin(modList, packname);
                     File.WriteAllText(Path.Combine(modSources?.SaveModPath ?? "", ModController.MakeSimpleString(packname), "packinfo.txt"), content);
-                    MessageBox.Show("Saved");
                 }
             });
             progressWindow.ShowDialog();
+            MessageBox.Show("Saved");
         }
 
         private void ListViewSkinSelected_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -504,6 +495,7 @@ namespace Aov_Mod_GUI
             levelWrapper = JsonConvert.DeserializeObject<SkinLevelWrapper>(File.ReadAllText(DataPaths.SkinLevels));
             modSources = JsonConvert.DeserializeObject<ModSources>(File.ReadAllText(DataPaths.ModSources));
             SkinPacks = [.. JsonConvert.DeserializeObject<SkinPackList>(File.ReadAllText(DataPaths.SkinPackList))?.SkinPacks];
+            MultiSkinPacks = [.. JsonConvert.DeserializeObject<MultiSkinPackList>(File.ReadAllText(DataPaths.MultiSkinPackList))?.PackList];
             #region ModSources Settings Init
             if (modSources != null)
             {
@@ -572,6 +564,8 @@ namespace Aov_Mod_GUI
                 field.RemoveButtonClick = (sender, e) =>
                 {
                     SkinPackContainer.Children.Remove(field);
+                    SkinPacks.Remove(skinPack);
+                    SaveSkinPacks();
                 };
                 SkinPackContainer.Children.Add(field);
             }
@@ -581,13 +575,25 @@ namespace Aov_Mod_GUI
                 Heroes = new ObservableCollection<Hero>(heroList.Heros);
                 if (modSources != null && levelWrapper != null)
                 {
-                    modController = new(modSources, levelWrapper) { heroList = Heroes.ToList() };
+                    modController = new(modSources, levelWrapper) { heroList = [.. Heroes] };
                 }
             }
             if (SkinPacks != null)
             {
                 SkinPacksCbb.ItemsSource = SkinPacks;
             }
+        }
+
+        internal static void SaveSkinPacks()
+        {
+            if (SkinPacks != null)
+                File.WriteAllText(DataPaths.SkinPackList, JsonConvert.SerializeObject(new SkinPackList([.. SkinPacks])));
+        }
+
+        internal static void SaveMultiSkinPacks()
+        {
+            if (MultiSkinPacks != null)
+                File.WriteAllText(DataPaths.MultiSkinPackList, JsonConvert.SerializeObject(new MultiSkinPackList([.. MultiSkinPacks])));
         }
 
         public static void SaveHeroList()
@@ -624,6 +630,16 @@ namespace Aov_Mod_GUI
             {
                 File.WriteAllText(DataPaths.SkinLevels, JsonConvert.SerializeObject(levelWrapper));
             }
+        }
+
+        internal static ObservableCollection<MultiSkinPack> GetMultiSkinPacks()
+        {
+            return MultiSkinPacks;
+        }
+
+        public static ModController? GetModController()
+        {
+            return modController;
         }
 
         public static List<Hero>? GetHeroList()
